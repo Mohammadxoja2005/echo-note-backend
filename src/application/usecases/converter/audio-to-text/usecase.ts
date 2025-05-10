@@ -23,8 +23,8 @@ export class ConverterAudioToTextUseCase {
         fs.unlinkSync(webmInputPath);
 
         console.time("transcribeAudioToText");
-        this.openAIASR.transcribeAudioToText(wavOutputPath).then((response) => {
-            console.log("response", response);
+        this.openAIASR.transcribeAudioToText(wavOutputPath).then((text) => {
+            console.log("text", text);
 
             fs.unlinkSync(wavOutputPath);
         })

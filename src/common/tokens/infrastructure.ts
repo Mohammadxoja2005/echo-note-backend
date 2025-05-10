@@ -4,5 +4,8 @@ export const Infrastructure = {
     },
     Converter: {
         Audio: Symbol.for("AudioConverter"),
+    },
+    Repository: {
+        User: Symbol.for("UserRepository"),
     }
 }

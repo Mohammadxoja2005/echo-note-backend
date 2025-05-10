@@ -10,7 +10,7 @@ export class OpenAIASR {
         return new Promise((resolve, reject) => {
             exec(`/home/muhammadxoja/me/whisper-env/bin/python3 /home/muhammadxoja/me/echo-note-backend/transcribe.py "/home/muhammadxoja/me/echo-note-backend/files/${audioFile}"`, (err, stdout, stderr) => {
                 if (err) {
-                    return reject(stderr)
+                    return reject(stderr);
                 }
                 resolve(stdout.trim());
             });

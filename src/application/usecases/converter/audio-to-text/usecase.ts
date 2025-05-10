@@ -14,7 +14,8 @@ export class ConverterAudioToTextUseCase {
     ) {
     }
 
-    public async execute(webmInputPath: string, wavOutputPath: string): Promise<void> {
+    public async execute(userId: string, webmInputPath: string, wavOutputPath: string): Promise<void> {
+        console.log(userId);
         console.time("convertWebmToWav");
         await this.audioConverter.convertWebmToWav(webmInputPath, wavOutputPath);
         console.timeEnd("convertWebmToWav");

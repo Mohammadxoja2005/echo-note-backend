@@ -6,7 +6,7 @@ const execAsync = promisify(exec);
 
 @Injectable()
 export class AudioConverter {
-    public async convertWebmpToWav(inputPath: string, outputPath: string): Promise<void> {
+    public async convertWebmToWav(inputPath: string, outputPath: string): Promise<void> {
         const command = `ffmpeg -i "${inputPath}" -acodec pcm_s16le -ar 44100 -ac 2 "${outputPath}"`;
 
         try {

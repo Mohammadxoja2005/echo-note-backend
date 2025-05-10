@@ -9,7 +9,6 @@ import {Response, Request} from "express";
 import {AuthGuard} from "app/application/api/guard";
 import {decode, JwtPayload} from "jsonwebtoken";
 
-
 @UseGuards(AuthGuard)
 @Controller("text-to-speech")
 export class TextToSpeechSpeechController {

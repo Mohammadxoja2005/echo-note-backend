@@ -10,4 +10,6 @@ export type User = {
         googleId: string;
     };
     subscription: UserSubscription;
+    createdAt: Date;
+    updatedAt: Date;
 }

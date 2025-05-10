@@ -57,6 +57,15 @@ export class UserRepositoryImpl implements UserRepository {
         return this.documentToEntity(document);
     }
 
+    public async updateStatus(userId: string, status: { active: boolean }): Promise<void> {
+        await this.model.updateOne(
+            {_id: new Types.ObjectId(userId)},
+            {
+                is_active: status.active
+            },
+        );
+    }
+
     public async updatePlan(user: {
         id: string;
     }): Promise<void> {
@@ -82,6 +91,8 @@ export class UserRepositoryImpl implements UserRepository {
                 id: document.subscription.id,
                 plan: document.subscription.plan,
             },
+            createdAt: document.created_at,
+            updatedAt: document.updated_at
         };
     }
 }

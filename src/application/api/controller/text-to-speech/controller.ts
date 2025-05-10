@@ -8,13 +8,20 @@ import {v4 as uuid} from 'uuid';
 import {Response, Request} from "express";
 import {AuthGuard} from "app/application/api/guard";
 import {decode, JwtPayload} from "jsonwebtoken";
+import {UserCheckTrialUseCase} from "app/application/usecases/user/check-trial";
+import {UserUpdateStatusUseCase} from "app/application/usecases/user/update-status/usecase";
+import * as fs from "node:fs";
 
 @UseGuards(AuthGuard)
 @Controller("text-to-speech")
 export class TextToSpeechSpeechController {
     constructor(
         @Inject(Application.ConverterAudioToTextUseCase)
-        private readonly converterAudioToTextUseCase: ConverterAudioToTextUseCase) {
+        private readonly converterAudioToTextUseCase: ConverterAudioToTextUseCase,
+        @Inject(Application.UseCase.UserCheckTrial)
+        private readonly userCheckTrialUseCase: UserCheckTrialUseCase,
+        @Inject(Application.UseCase.UserUpdateStatus)
+        private readonly userUpdateStatusUseCase: UserUpdateStatusUseCase) {
     }
 
     @Post('audio')
@@ -30,9 +37,21 @@ export class TextToSpeechSpeechController {
         }),
     )
     async convertAudioToText(@UploadedFile() file: any, @Res() response: Response, @Req() request: Request) {
+        const {userId, email, name} = decode(request.header("Token") as string) as JwtPayload;
+        const isTrial = await this.userCheckTrialUseCase.execute(userId);
+
+        if (!isTrial) {
+            await this.userUpdateStatusUseCase.execute(userId, {active: false});
+
+            fs.unlinkSync(file.path);
+
+            response.json({status: "trial expired"});
+
+            return;
+        }
+
         const inputPath = file.path;
         const outputPath = inputPath.replace('.webm', '.wav');
-        const {userId, email, name} = decode(request.header("Token") as string) as JwtPayload;
 
         await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
 

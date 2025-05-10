@@ -4,9 +4,10 @@ import {ConverterAudioToTextUseCase} from "app/application/usecases/converter";
 import {Application, Infrastructure} from "app/common";
 import {AudioConverter} from "app/infrastructure/converter";
 import {AsrModule} from "app/application/common/asr";
+import {UserModule} from "app/application/common/user/module";
 
 @Module({
-    imports: [AsrModule],
+    imports: [AsrModule, UserModule],
     providers: [
         {
             provide: Application.ConverterAudioToTextUseCase,
@@ -18,7 +19,11 @@ import {AsrModule} from "app/application/common/asr";
         }
     ],
     controllers: [TextToSpeechSpeechController],
-    exports: [Application.ConverterAudioToTextUseCase, Infrastructure.Converter.Audio, Application.ConverterAudioToTextUseCase],
+    exports: [
+        Application.ConverterAudioToTextUseCase,
+        Infrastructure.Converter.Audio,
+        Application.ConverterAudioToTextUseCase
+    ],
 })
 export class ConverterModule {
 }

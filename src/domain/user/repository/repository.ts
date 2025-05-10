@@ -1,7 +1,7 @@
 import {User} from "app/domain";
 
 export interface UserRepository {
-    create(user: Omit<User, "id">): Promise<void>;
+    create(user: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<void>;
 
     getByGoogleId(id: string): Promise<User>;
 
@@ -10,4 +10,6 @@ export interface UserRepository {
     }): Promise<void>;
 
     getById(id: string): Promise<User>;
+
+    updateStatus(userId: string, status: { active: boolean }): Promise<void>
 }

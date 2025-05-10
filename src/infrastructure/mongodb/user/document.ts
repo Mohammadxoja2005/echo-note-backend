@@ -11,8 +11,8 @@ export type UserDocument = {
     oauth: {
         google_id: string;
     };
-    created_at: string;
-    updated_at: string;
+    created_at: Date;
+    updated_at: Date;
 };
 
 export type UserCreateDocument = Omit<UserDocument, "_id" | "created_at" | "updated_at">;

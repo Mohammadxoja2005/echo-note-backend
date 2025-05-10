@@ -1,7 +1,7 @@
 import {User} from "app/domain";
 
 export interface UserRepository {
-    create(user: User): Promise<void>;
+    create(user: Omit<User, "id">): Promise<void>;
 
     getByGoogleId(id: string): Promise<User>;
 

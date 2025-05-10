@@ -9,7 +9,7 @@ export const UserSchema = new Schema<UserHydratedDocument>(
         picture: String,
         is_active: Boolean,
         oauth: {
-            googleId: String,
+            google_id: String,
         },
         subscription: {
             id: {type: String, default: null},

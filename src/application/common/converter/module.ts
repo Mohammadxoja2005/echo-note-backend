@@ -5,9 +5,10 @@ import {Application, Infrastructure} from "app/common";
 import {AudioConverter} from "app/infrastructure/converter";
 import {AsrModule} from "app/application/common/asr";
 import {UserModule} from "app/application/common/user/module";
+import {NoteModule} from "app/application/common/note";
 
 @Module({
-    imports: [AsrModule, UserModule],
+    imports: [AsrModule, UserModule, NoteModule],
     providers: [
         {
             provide: Application.ConverterAudioToTextUseCase,

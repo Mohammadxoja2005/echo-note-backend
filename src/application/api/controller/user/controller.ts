@@ -1,4 +1,4 @@
-import {Controller, Get, Inject, Post, Req, Res, UseGuards} from "@nestjs/common";
+import {Controller, Get, HttpStatus, Inject, Post, Req, Res, UseGuards} from "@nestjs/common";
 import {UserAuthenticateUseCase} from "app/application/usecases/user/authenticate";
 import {AuthGuard as APIAuthGuard} from "app/application/api/guard";
 import {Response, Request} from "express";
@@ -61,7 +61,7 @@ export class UserController {
         if (!isTrial) {
             await this.userUpdateStatusUseCase.execute(userId, {active: false});
 
-            response.json({status: "trial expired"});
+            response.status(HttpStatus.FORBIDDEN).json({status: "trial expired"});
 
             return;
         }

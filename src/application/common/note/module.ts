@@ -8,6 +8,7 @@ import {NoteRepositoryImpl} from "app/infrastructure/mongodb/note/note.impl";
 import {NoteGetAllUseCase} from "app/application/usecases/note/get-all";
 import {NoteGetUseCase} from "app/application/usecases/note/get";
 import {NoteUpdateTitleAndDescription} from "app/application/usecases/note/update-title-and-description";
+import {NoteController} from "app/application/api/controller/note";
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import {NoteUpdateTitleAndDescription} from "app/application/usecases/note/updat
         NoteGetUseCase,
         NoteUpdateTitleAndDescription
     ],
+    controllers: [NoteController],
     exports: [Infrastructure.Repository.Note],
 })
 export class NoteModule {

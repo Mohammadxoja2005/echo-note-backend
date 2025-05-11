@@ -1,4 +1,4 @@
-import { Controller, Headers, Inject, Post, RawBodyRequest, Req, Res } from "@nestjs/common";
+import { Controller, Headers, Post, RawBodyRequest, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import {
     PaymentProcesserEvent,

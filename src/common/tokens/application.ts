@@ -3,5 +3,6 @@ export const Application = {
     UseCase: {
         UserCheckTrial: Symbol.for("UseCase.UserCheckTrial"),
         UserUpdateStatus: Symbol.for("UseCase.UserUpdateStatus"),
-    }
-}
+        SubscriptionCancel: Symbol.for("UseCase.SubscriptionCancel"),
+    },
+};

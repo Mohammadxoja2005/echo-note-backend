@@ -7,6 +7,7 @@ import { AuthModule } from "app/application/common/auth";
 import { NoteModule } from "app/application/common/note";
 import { CheckoutModule } from "app/application/common/checkout";
 import { PaymentProcessorModule } from "app/application/common/payment-processor";
+import { SubscriptionModule } from "app/application/common/subscription";
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { PaymentProcessorModule } from "app/application/common/payment-processor
         NoteModule,
         CheckoutModule,
         PaymentProcessorModule,
+        SubscriptionModule,
     ],
 })
 export class AppModule {}

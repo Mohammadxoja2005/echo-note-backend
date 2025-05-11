@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
-import { UserAuthenticateUseCase } from "app/application/usecases/user/authenticate";
-import { AuthGuard as APIAuthGuard } from "app/application/api/guard";
-import { Response, Request } from "express";
-import { decode, JwtPayload } from "jsonwebtoken";
-import { UserGetProfile } from "app/application/usecases/user/get-profile";
-import { AuthGuard } from "@nestjs/passport";
+import {Controller, Get, Inject, Post, Req, Res, UseGuards} from "@nestjs/common";
+import {UserAuthenticateUseCase} from "app/application/usecases/user/authenticate";
+import {AuthGuard as APIAuthGuard} from "app/application/api/guard";
+import {Response, Request} from "express";
+import {decode, JwtPayload} from "jsonwebtoken";
+import {UserGetProfile} from "app/application/usecases/user/get-profile";
+import {AuthGuard} from "@nestjs/passport";
+import {Application} from "app/common";
+import {UserCheckTrialUseCase} from "app/application/usecases/user/check-trial";
+import {UserUpdateStatusUseCase} from "app/application/usecases/user/update-status/usecase";
 
 type AuthenticatedRequest = Request & {
     user: {
@@ -18,11 +21,17 @@ export class UserController {
     constructor(
         private readonly userAuthenticateUseCase: UserAuthenticateUseCase,
         private readonly userGetProfile: UserGetProfile,
-    ) {}
+        @Inject(Application.UseCase.UserCheckTrial)
+        private readonly userCheckTrialUseCase: UserCheckTrialUseCase,
+        @Inject(Application.UseCase.UserUpdateStatus)
+        private readonly userUpdateStatusUseCase: UserUpdateStatusUseCase
+    ) {
+    }
 
     @Get("google")
     @UseGuards(AuthGuard("google"))
-    async googleAuth() {}
+    async googleAuth() {
+    }
 
     @Get("google/callback")
     @UseGuards(AuthGuard("google"))
@@ -45,7 +54,17 @@ export class UserController {
     @UseGuards(APIAuthGuard)
     @Post("profile")
     async getProfile(@Req() request: Request, @Res() response: Response) {
-        const { userId } = decode(request.header("Token") as string) as JwtPayload;
+        const {userId, email, name} = decode(request.header("Token") as string) as JwtPayload;
+
+        const isTrial = await this.userCheckTrialUseCase.execute(userId);
+
+        if (!isTrial) {
+            await this.userUpdateStatusUseCase.execute(userId, {active: false});
+
+            response.json({status: "trial expired"});
+
+            return;
+        }
 
         const user = await this.userGetProfile.execute(userId);
 

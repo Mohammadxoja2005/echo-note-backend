@@ -17,11 +17,7 @@ import * as fs from "node:fs";
 export class TextToSpeechSpeechController {
     constructor(
         @Inject(Application.ConverterAudioToTextUseCase)
-        private readonly converterAudioToTextUseCase: ConverterAudioToTextUseCase,
-        @Inject(Application.UseCase.UserCheckTrial)
-        private readonly userCheckTrialUseCase: UserCheckTrialUseCase,
-        @Inject(Application.UseCase.UserUpdateStatus)
-        private readonly userUpdateStatusUseCase: UserUpdateStatusUseCase) {
+        private readonly converterAudioToTextUseCase: ConverterAudioToTextUseCase) {
     }
 
     @Post('audio')
@@ -38,17 +34,6 @@ export class TextToSpeechSpeechController {
     )
     async convertAudioToText(@UploadedFile() file: any, @Res() response: Response, @Req() request: Request) {
         const {userId, email, name} = decode(request.header("Token") as string) as JwtPayload;
-        const isTrial = await this.userCheckTrialUseCase.execute(userId);
-
-        if (!isTrial) {
-            await this.userUpdateStatusUseCase.execute(userId, {active: false});
-
-            fs.unlinkSync(file.path);
-
-            response.json({status: "trial expired"});
-
-            return;
-        }
 
         const inputPath = file.path;
         const outputPath = inputPath.replace('.webm', '.wav');

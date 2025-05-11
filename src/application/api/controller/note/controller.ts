@@ -50,5 +50,4 @@ export class NoteController {
 
         response.status(200).json({status: "success"});
     }
-
 }

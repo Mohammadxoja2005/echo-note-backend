@@ -5,6 +5,9 @@ import {Collections} from "app/infrastructure/schema";
 import {NoteSchema} from "app/infrastructure/mongodb/note/schema";
 import {Infrastructure} from "app/common";
 import {NoteRepositoryImpl} from "app/infrastructure/mongodb/note/note.impl";
+import {NoteGetAllUseCase} from "app/application/usecases/note/get-all";
+import {NoteGetUseCase} from "app/application/usecases/note/get";
+import {NoteUpdateTitleAndDescription} from "app/application/usecases/note/update-title-and-description";
 
 @Module({
     imports: [
@@ -20,7 +23,10 @@ import {NoteRepositoryImpl} from "app/infrastructure/mongodb/note/note.impl";
         {
             provide: Infrastructure.Repository.Note,
             useClass: NoteRepositoryImpl,
-        }
+        },
+        NoteGetAllUseCase,
+        NoteGetUseCase,
+        NoteUpdateTitleAndDescription
     ],
     exports: [Infrastructure.Repository.Note],
 })

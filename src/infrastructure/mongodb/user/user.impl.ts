@@ -1,17 +1,16 @@
-import {Injectable, NotFoundException} from "@nestjs/common";
-import {User, UserRepository} from "app/domain";
-import {Model, Types} from "mongoose";
-import {Collections} from "app/infrastructure/schema";
-import {UserCreateDocument, UserDocument, UserHydratedDocument} from "./document";
-import {InjectModel} from "@nestjs/mongoose";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { User, UserRepository, UserSubscriptionPlan } from "app/domain";
+import { Model, Types } from "mongoose";
+import { Collections } from "app/infrastructure/schema";
+import { UserCreateDocument, UserDocument, UserHydratedDocument } from "./document";
+import { InjectModel } from "@nestjs/mongoose";
 
 @Injectable()
 export class UserRepositoryImpl implements UserRepository {
     constructor(
         @InjectModel(Collections.User)
         private readonly model: Model<UserHydratedDocument>,
-    ) {
-    }
+    ) {}
 
     public async create(user: User): Promise<void> {
         const isUserExists = await this.model.findOne<UserDocument>({
@@ -38,7 +37,7 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     public async getByGoogleId(id: string): Promise<User> {
-        const document = await this.model.findOne<UserDocument>({"oauth.google_id": id});
+        const document = await this.model.findOne<UserDocument>({ "oauth.google_id": id });
 
         if (!document) {
             throw new NotFoundException("User not found");
@@ -48,7 +47,7 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     public async getById(id: string): Promise<User> {
-        const document = await this.model.findOne({_id: new Types.ObjectId(id)});
+        const document = await this.model.findOne({ _id: new Types.ObjectId(id) });
 
         if (!document) {
             throw new Error("User not found");
@@ -59,20 +58,26 @@ export class UserRepositoryImpl implements UserRepository {
 
     public async updateStatus(userId: string, status: { active: boolean }): Promise<void> {
         await this.model.updateOne(
-            {_id: new Types.ObjectId(userId)},
+            { _id: new Types.ObjectId(userId) },
             {
-                is_active: status.active
+                is_active: status.active,
             },
         );
     }
 
     public async updatePlan(user: {
         id: string;
+        isActive: boolean;
+        subscription: { id: string; plan: UserSubscriptionPlan };
     }): Promise<void> {
         await this.model.updateOne(
-            {_id: new Types.ObjectId(user.id)},
+            { _id: new Types.ObjectId(user.id) },
             {
-                is_active: true
+                is_active: user.isActive,
+                subscription: {
+                    id: user.subscription.id,
+                    plan: user.subscription.plan,
+                },
             },
         );
     }
@@ -92,7 +97,7 @@ export class UserRepositoryImpl implements UserRepository {
                 plan: document.subscription.plan,
             },
             createdAt: document.created_at,
-            updatedAt: document.updated_at
+            updatedAt: document.updated_at,
         };
     }
 }

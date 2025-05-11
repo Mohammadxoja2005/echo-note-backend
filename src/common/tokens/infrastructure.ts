@@ -8,5 +8,8 @@ export const Infrastructure = {
     Repository: {
         User: Symbol.for("UserRepository"),
         Note: Symbol.for("NoteRepository")
+    },
+    PaymentProcessor: {
+        LemonSqueezy: Symbol.for("PaymentProcessorLemonSqueezy"),
     }
 }

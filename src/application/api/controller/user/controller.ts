@@ -1,13 +1,13 @@
-import {Controller, Get, HttpStatus, Inject, Post, Req, Res, UseGuards} from "@nestjs/common";
-import {UserAuthenticateUseCase} from "app/application/usecases/user/authenticate";
-import {AuthGuard as APIAuthGuard} from "app/application/api/guard";
-import {Response, Request} from "express";
-import {decode, JwtPayload} from "jsonwebtoken";
-import {UserGetProfile} from "app/application/usecases/user/get-profile";
-import {AuthGuard} from "@nestjs/passport";
-import {Application} from "app/common";
-import {UserCheckTrialUseCase} from "app/application/usecases/user/check-trial";
-import {UserUpdateStatusUseCase} from "app/application/usecases/user/update-status/usecase";
+import { Controller, Get, HttpStatus, Inject, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { UserAuthenticateUseCase } from "app/application/usecases/user/authenticate";
+import { AuthGuard as APIAuthGuard } from "app/application/api/guard";
+import { Response, Request } from "express";
+import { decode, JwtPayload } from "jsonwebtoken";
+import { UserGetProfile } from "app/application/usecases/user/get-profile";
+import { AuthGuard } from "@nestjs/passport";
+import { Application } from "app/common";
+import { UserCheckTrialUseCase } from "app/application/usecases/user/check-trial";
+import { UserUpdateStatusUseCase } from "app/application/usecases/user/update-status/usecase";
 
 type AuthenticatedRequest = Request & {
     user: {
@@ -24,14 +24,12 @@ export class UserController {
         @Inject(Application.UseCase.UserCheckTrial)
         private readonly userCheckTrialUseCase: UserCheckTrialUseCase,
         @Inject(Application.UseCase.UserUpdateStatus)
-        private readonly userUpdateStatusUseCase: UserUpdateStatusUseCase
-    ) {
-    }
+        private readonly userUpdateStatusUseCase: UserUpdateStatusUseCase,
+    ) {}
 
     @Get("google")
     @UseGuards(AuthGuard("google"))
-    async googleAuth() {
-    }
+    async googleAuth() {}
 
     @Get("google/callback")
     @UseGuards(AuthGuard("google"))
@@ -54,20 +52,20 @@ export class UserController {
     @UseGuards(APIAuthGuard)
     @Post("profile")
     async getProfile(@Req() request: Request, @Res() response: Response) {
-        const {userId, email, name} = decode(request.header("Token") as string) as JwtPayload;
+        const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
 
-        const isTrial = await this.userCheckTrialUseCase.execute(userId);
+        const { isActive, daysLeft } = await this.userCheckTrialUseCase.execute(userId);
 
-        if (!isTrial) {
-            await this.userUpdateStatusUseCase.execute(userId, {active: false});
+        if (!isActive) {
+            await this.userUpdateStatusUseCase.execute(userId, { active: false });
 
-            response.status(HttpStatus.FORBIDDEN).json({status: "trial expired"});
+            response.status(HttpStatus.FORBIDDEN).json({ status: "trial expired" });
 
             return;
         }
 
         const user = await this.userGetProfile.execute(userId);
 
-        response.status(200).json(user);
+        response.status(200).json({ user: user, daysLeft: 7 - daysLeft });
     }
 }

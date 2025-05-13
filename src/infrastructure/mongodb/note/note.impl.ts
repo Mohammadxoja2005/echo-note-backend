@@ -1,18 +1,17 @@
-import {Injectable} from "@nestjs/common";
-import {Note, NoteRepository} from "app/domain";
-import {InjectModel} from "@nestjs/mongoose";
-import {Collections} from "app/infrastructure/schema";
-import {Model, Types} from "mongoose";
-import {NoteDocument, NoteHydratedDocument} from "app/infrastructure/mongodb/note/document";
-import {NoteStatus} from "app/domain/note/types";
+import { Injectable } from "@nestjs/common";
+import { Note, NoteRepository } from "app/domain";
+import { InjectModel } from "@nestjs/mongoose";
+import { Collections } from "app/infrastructure/schema";
+import { Model, Types } from "mongoose";
+import { NoteDocument, NoteHydratedDocument } from "app/infrastructure/mongodb/note/document";
+import { NoteStatus } from "app/domain/note/types";
 
 @Injectable()
 export class NoteRepositoryImpl implements NoteRepository {
     constructor(
         @InjectModel(Collections.Note)
         private readonly model: Model<NoteHydratedDocument>,
-    ) {
-    }
+    ) {}
 
     public async create(note: Note): Promise<Note> {
         const document = await this.model.create({
@@ -43,9 +42,11 @@ export class NoteRepositoryImpl implements NoteRepository {
         const skip = (page - 1) * limit;
 
         const [documents, totalCount] = await Promise.all([
-            this.model.find<NoteHydratedDocument>({
-                user_id: new Types.ObjectId(userId),
-            }).sort({createdAt: -1})
+            this.model
+                .find<NoteHydratedDocument>({
+                    user_id: new Types.ObjectId(userId),
+                })
+                .sort({ created_at: -1 })
                 .skip(skip)
                 .limit(limit),
 
@@ -62,11 +63,19 @@ export class NoteRepositoryImpl implements NoteRepository {
         };
     }
 
-    public async updateTitleAndDescription(id: string, userId: string, title: string, description: string): Promise<void> {
-        await this.model.updateOne({
-            _id: new Types.ObjectId(id),
-            user_id: new Types.ObjectId(userId)
-        }, {title: title, description: description, status: NoteStatus.done});
+    public async updateTitleAndDescription(
+        id: string,
+        userId: string,
+        title: string,
+        description: string,
+    ): Promise<void> {
+        await this.model.updateOne(
+            {
+                _id: new Types.ObjectId(id),
+                user_id: new Types.ObjectId(userId),
+            },
+            { title: title, description: description, status: NoteStatus.done },
+        );
     }
 
     private documentToEntity(document: NoteDocument): Note {
@@ -78,6 +87,6 @@ export class NoteRepositoryImpl implements NoteRepository {
             status: document.status,
             createdAt: document.created_at,
             updatedAt: document.updated_at,
-        }
+        };
     }
 }

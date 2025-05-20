@@ -12,7 +12,7 @@ export class UserLoginWithMailUseCase {
 
             await this.mailSender.sendMail({
                 to: email,
-                subject: "Login with email",
+                subject: "Sign In to EchoNote",
                 url: url,
             });
         } catch (error) {

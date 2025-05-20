@@ -17,7 +17,11 @@ export class UserRepositoryImpl implements UserRepository {
             "oauth.google_id": user.oauth.googleId,
         });
 
-        if (isUserExists) {
+        const isEmailUserExists = await this.model.findOne<UserDocument>({
+            email: user.email,
+        });
+
+        if (isUserExists || isEmailUserExists) {
             return;
         }
 

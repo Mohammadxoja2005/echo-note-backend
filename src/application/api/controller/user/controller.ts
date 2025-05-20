@@ -8,6 +8,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { Application } from "app/common";
 import { UserCheckTrialUseCase } from "app/application/usecases/user/check-trial";
 import { UserUpdateStatusUseCase } from "app/application/usecases/user/update-status/usecase";
+import { UserLoginWithMailUseCase } from "app/application/usecases/user/login-with-mail/usecase";
 
 type AuthenticatedRequest = Request & {
     user: {
@@ -25,6 +26,7 @@ export class UserController {
         private readonly userCheckTrialUseCase: UserCheckTrialUseCase,
         @Inject(Application.UseCase.UserUpdateStatus)
         private readonly userUpdateStatusUseCase: UserUpdateStatusUseCase,
+        private readonly userLoginWithEmailUseCase: UserLoginWithMailUseCase,
     ) {}
 
     @Get("google")
@@ -47,6 +49,25 @@ export class UserController {
         const frontendUrl = `${process.env.FRONTEND_URL}?token=${user.token}`;
 
         response.redirect(frontendUrl);
+    }
+
+    @Post("email")
+    async authByEmail(
+        @Req() request: AuthenticatedRequest,
+        @Res() response: Response,
+    ): Promise<void> {
+        const { email } = request.body;
+
+        const user = await this.userAuthenticateUseCase.execute({
+            name: null,
+            email: email,
+            googleId: "",
+            picture: null,
+        });
+
+        await this.userLoginWithEmailUseCase.execute(email, user.token);
+
+        response.status(200).json({ result: "email sent successfully." });
     }
 
     @UseGuards(APIAuthGuard)

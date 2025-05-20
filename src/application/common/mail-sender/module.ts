@@ -11,6 +11,6 @@ import { Infrastructure } from "app/common";
             useClass: MailSenderImpl,
         },
     ],
-    exports: [],
+    exports: [Infrastructure.MailSender],
 })
 export class MailSenderModule {}

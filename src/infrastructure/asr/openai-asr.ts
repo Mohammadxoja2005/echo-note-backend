@@ -8,7 +8,7 @@ export class OpenAIASR {
 
     public async transcribeAudioToText(filePath: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            exec(`/home/muhammadxoja/me/whisper-env/bin/python3 /home/muhammadxoja/me/echo-note-backend/transcribe.py "${filePath}"`, (err, stdout, stderr) => {
+            exec(`${process.env.BASE_PATH}/whisper-env/bin/python3 ${process.env.BASE_PATH}/echo-note-backend/transcribe.py "${filePath}"`, (err, stdout, stderr) => {
                 if (err) {
                     return reject(stderr);
                 }

@@ -8,9 +8,13 @@ import { NoteModule } from "app/application/common/note";
 import { CheckoutModule } from "app/application/common/checkout";
 import { PaymentProcessorModule } from "app/application/common/payment-processor";
 import { SubscriptionModule } from "app/application/common/subscription";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
     imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
         AsrModule,
         ConverterModule,
         MongooseModule,

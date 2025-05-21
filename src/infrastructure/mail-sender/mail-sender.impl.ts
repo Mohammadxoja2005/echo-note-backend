@@ -1,21 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import * as nodemailer from "nodemailer";
 import { MailSender } from "app/domain/mail-sender";
+import { Resend } from "resend";
 
 @Injectable()
 export class MailSenderImpl implements MailSender {
-    private transporter = nodemailer.createTransport({
-        host: "smtp.zoho.com",
-        port: 465,
-        secure: true,
-        auth: {
-            user: process.env.ZOHO_USER,
-            pass: process.env.ZOHO_PASS,
-        },
-    });
+    private readonly resend = new Resend(process.env.RESEND_API_KEY);
 
     public async sendMail(mail: { to: string; subject: string; url: string }) {
-        await this.transporter.sendMail({
+        await this.resend.emails.send({
             from: `"EchoNote" <${process.env.EMAIL_USER}>`,
             to: mail.to,
             subject: mail.subject,

@@ -13,6 +13,7 @@ import { UserCheckTrialUseCase } from "app/application/usecases/user/check-trial
 import { UserUpdateStatusUseCase } from "app/application/usecases/user/update-status/usecase";
 import { UserLoginWithMailUseCase } from "app/application/usecases/user/login-with-mail/usecase";
 import { MailSenderModule } from "app/application/common/mail-sender";
+import { UserUpdateRemainingSecondsUseCase } from "app/application/usecases/user/update-remaining-seconds";
 
 @Module({
     imports: [
@@ -42,6 +43,7 @@ import { MailSenderModule } from "app/application/common/mail-sender";
         UserGetProfile,
         UserAuthenticateUseCase,
         UserLoginWithMailUseCase,
+        UserUpdateRemainingSecondsUseCase
     ],
     controllers: [UserController],
     exports: [

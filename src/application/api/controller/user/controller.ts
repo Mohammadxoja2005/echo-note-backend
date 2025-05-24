@@ -9,6 +9,7 @@ import { Application } from "app/common";
 import { UserCheckTrialUseCase } from "app/application/usecases/user/check-trial";
 import { UserUpdateStatusUseCase } from "app/application/usecases/user/update-status/usecase";
 import { UserLoginWithMailUseCase } from "app/application/usecases/user/login-with-mail/usecase";
+import { UserUpdateRemainingSecondsUseCase } from "app/application/usecases/user/update-remaining-seconds";
 
 type AuthenticatedRequest = Request & {
     user: {
@@ -27,6 +28,7 @@ export class UserController {
         @Inject(Application.UseCase.UserUpdateStatus)
         private readonly userUpdateStatusUseCase: UserUpdateStatusUseCase,
         private readonly userLoginWithEmailUseCase: UserLoginWithMailUseCase,
+        private readonly userUpdateRemainingSecondsUseCase: UserUpdateRemainingSecondsUseCase,
     ) {}
 
     @Get("google")
@@ -75,6 +77,7 @@ export class UserController {
     async getProfile(@Req() request: Request, @Res() response: Response) {
         const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
 
+        await this.userUpdateRemainingSecondsUseCase.execute(userId);
         const { isActive, daysLeft } = await this.userCheckTrialUseCase.execute(userId);
 
         if (!isActive) {

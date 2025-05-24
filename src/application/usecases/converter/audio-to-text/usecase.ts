@@ -29,8 +29,6 @@ export class ConverterAudioToTextUseCase {
         webmInputPath: string,
         wavOutputPath: string,
     ): Promise<void> {
-        const sessionDirId = uuidv4();
-        const chunkDir = path.join("./webm-files", sessionDirId);
         const user = await this.user.getById(userId);
         const duration = await this.getDuration(webmInputPath);
 
@@ -41,6 +39,9 @@ export class ConverterAudioToTextUseCase {
                 "Audio file duration exceeds 1 hour (3600 seconds) or insufficient remaining seconds.",
             );
         }
+
+        const sessionDirId = uuidv4();
+        const chunkDir = path.join("./webm-files", sessionDirId);
 
         fs.mkdirSync(chunkDir, { recursive: true });
 

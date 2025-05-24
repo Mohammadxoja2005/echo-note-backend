@@ -35,6 +35,8 @@ export class ConverterAudioToTextUseCase {
         const duration = await this.getDuration(webmInputPath);
 
         if (duration > 3600 || user.remainingSeconds < duration) {
+            fs.unlinkSync(webmInputPath);
+
             throw new Error(
                 "Audio file duration exceeds 1 hour (3600 seconds) or insufficient remaining seconds.",
             );

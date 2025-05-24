@@ -1,9 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Infrastructure } from "app/common";
-import { AudioConverter } from "app/infrastructure/converter";
 import { OpenAIASR } from "app/infrastructure/asr";
 import * as fs from "node:fs";
-import { NoteRepository, User, UserRepository } from "app/domain";
+import { NoteRepository, UserRepository } from "app/domain";
 import { NoteStatus } from "app/domain/note/types";
 import { format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
@@ -14,8 +13,6 @@ import * as util from "util";
 @Injectable()
 export class ConverterAudioToTextUseCase {
     constructor(
-        @Inject(Infrastructure.Converter.Audio)
-        private readonly audioConverter: AudioConverter,
         @Inject(Infrastructure.ASR.OpenAI)
         private readonly openAIASR: OpenAIASR,
         @Inject(Infrastructure.Repository.Note)

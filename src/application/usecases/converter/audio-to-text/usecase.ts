@@ -3,12 +3,13 @@ import { Infrastructure } from "app/common";
 import { AudioConverter } from "app/infrastructure/converter";
 import { OpenAIASR } from "app/infrastructure/asr";
 import * as fs from "node:fs";
-import { NoteRepository } from "app/domain";
+import { NoteRepository, User, UserRepository } from "app/domain";
 import { NoteStatus } from "app/domain/note/types";
 import { format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import * as path from "node:path";
 import { exec } from "child_process";
+import * as util from "util";
 
 @Injectable()
 export class ConverterAudioToTextUseCase {
@@ -19,6 +20,8 @@ export class ConverterAudioToTextUseCase {
         private readonly openAIASR: OpenAIASR,
         @Inject(Infrastructure.Repository.Note)
         private readonly noteRepository: NoteRepository,
+        @Inject(Infrastructure.Repository.User)
+        private readonly user: UserRepository,
     ) {}
 
     public async execute(
@@ -28,6 +31,14 @@ export class ConverterAudioToTextUseCase {
     ): Promise<void> {
         const sessionDirId = uuidv4();
         const chunkDir = path.join("./webm-files", sessionDirId);
+        const user = await this.user.getById(userId);
+        const duration = await this.getDuration(webmInputPath);
+
+        if (duration > 3600 || user.remainingSeconds < duration) {
+            throw new Error(
+                "Audio file duration exceeds 1 hour (3600 seconds) or insufficient remaining seconds.",
+            );
+        }
 
         fs.mkdirSync(chunkDir, { recursive: true });
 
@@ -42,9 +53,16 @@ export class ConverterAudioToTextUseCase {
             status: NoteStatus.progress,
         });
 
-        this.transcribeChunksAndSave(chunkDir, note.id, userId).catch((err) => {
-            console.error("Background transcription error:", err);
-        });
+        this.transcribeChunksAndSave(chunkDir, note.id, userId)
+            .then(() => {
+                console.log("transcription completed successfully");
+            })
+            .catch((err) => {
+                console.error("Background transcription error:", err);
+            });
+
+        user.remainingSeconds -= duration;
+        await this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
     }
 
     private async transcribeChunksAndSave(
@@ -95,5 +113,19 @@ export class ConverterAudioToTextUseCase {
                 resolve(files);
             });
         });
+    }
+
+    async getDuration(filePath: string): Promise<number> {
+        const execPromise = util.promisify(exec);
+
+        const cmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`;
+
+        try {
+            const { stdout } = await execPromise(cmd);
+            return parseFloat(stdout.trim());
+        } catch (error) {
+            console.error("Error getting duration:", error);
+            throw new Error("Could not get file duration");
+        }
     }
 }

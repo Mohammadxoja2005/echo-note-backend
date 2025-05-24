@@ -33,6 +33,8 @@ export class UserRepositoryImpl implements UserRepository {
             oauth: {
                 google_id: user.oauth.googleId,
             },
+            remaining_seconds: user.remainingSeconds,
+            last_visit: user.lastVisit,
             subscription: {
                 id: null,
                 plan: user.subscription.plan,
@@ -86,6 +88,15 @@ export class UserRepositoryImpl implements UserRepository {
         );
     }
 
+    public async updateRemainingSeconds(userId: string, seconds: number): Promise<void> {
+        await this.model.updateOne(
+            { _id: new Types.ObjectId(userId) },
+            {
+                remaining_seconds: seconds,
+            },
+        );
+    }
+
     private documentToEntity(document: UserDocument): User {
         return {
             id: document._id.toString(),
@@ -100,6 +111,8 @@ export class UserRepositoryImpl implements UserRepository {
                 id: document.subscription.id,
                 plan: document.subscription.plan,
             },
+            remainingSeconds: document.remaining_seconds,
+            lastVisit: document.last_visit,
             createdAt: document.created_at,
             updatedAt: document.updated_at,
         };

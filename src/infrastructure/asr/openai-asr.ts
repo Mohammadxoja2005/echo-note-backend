@@ -1,19 +1,29 @@
-import {Injectable} from "@nestjs/common";
-import {exec} from "child_process";
+import { Injectable } from "@nestjs/common";
+import axios from "axios";
+import * as fs from "node:fs";
+import * as FormData from "form-data";
 
 @Injectable()
 export class OpenAIASR {
-    constructor() {
-    }
+    constructor() {}
 
     public async transcribeAudioToText(filePath: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            exec(`${process.env.BASE_PATH}/whisper-env/bin/python3 ${process.env.BASE_PATH}/echo-note-backend/transcribe.py "${filePath}"`, (err, stdout, stderr) => {
-                if (err) {
-                    return reject(stderr);
-                }
-                resolve(stdout.trim());
-            });
-        });
+        const formData = new FormData();
+        formData.append("file", fs.createReadStream(filePath));
+        formData.append("model", "whisper-1");
+        formData.append("response_format", "text");
+
+        const response = await axios.post(
+            "https://api.openai.com/v1/audio/transcriptions",
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                    ...formData.getHeaders(),
+                },
+            },
+        );
+
+        return response.data;
     }
 }

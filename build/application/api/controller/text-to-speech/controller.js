@@ -20,7 +20,9 @@ let TextToSpeechSpeechController = class TextToSpeechSpeechController {
             const { userId, email, name } = (0, jsonwebtoken_1.decode)(request.header("Token"));
             const inputPath = file.path;
             const outputPath = inputPath.replace(".webm", ".wav");
-            this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+            console.time("full request");
+            yield this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+            console.timeEnd("full request");
             response.json({ status: "progress" });
         });
     }

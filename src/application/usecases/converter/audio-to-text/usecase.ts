@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as path from "node:path";
 import { exec } from "child_process";
 import * as util from "util";
+import pLimit from "p-limit";
 
 @Injectable()
 export class ConverterAudioToTextUseCase {
@@ -54,15 +55,14 @@ export class ConverterAudioToTextUseCase {
         });
 
         this.transcribeChunksAndSave(chunkDir, note.id, userId)
-            .then(() => {
+            .then(async () => {
                 console.log("transcription completed successfully");
+                user.remainingSeconds -= duration;
+                await this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
             })
             .catch((err) => {
                 console.error("Background transcription error:", err);
             });
-
-        user.remainingSeconds -= duration;
-        await this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
     }
 
     private async transcribeChunksAndSave(
@@ -70,18 +70,23 @@ export class ConverterAudioToTextUseCase {
         noteId: string,
         userId: string,
     ): Promise<void> {
+        const limit = pLimit(5);
+
         const files = fs
             .readdirSync(chunkDir)
             .filter((f) => f.endsWith(".webm"))
             .sort();
 
-        let fullTranscript = "";
+        const transcriptionPromises = files.map((file) =>
+            limit(async () => {
+                const filePath = path.join(chunkDir, file);
+                return await this.openAIASR.transcribeAudioToText(filePath);
+            }),
+        );
 
-        for (const file of files) {
-            const filePath = path.join(chunkDir, file);
-            const chunkText = await this.openAIASR.transcribeAudioToText(filePath);
-            fullTranscript += chunkText + "\n";
-        }
+        const transcriptions = await Promise.all(transcriptionPromises);
+
+        const fullTranscript = transcriptions.join("\n");
 
         await this.noteRepository.updateTitleAndDescription(
             noteId,
@@ -118,10 +123,20 @@ export class ConverterAudioToTextUseCase {
     async getDuration(filePath: string): Promise<number> {
         const execPromise = util.promisify(exec);
 
-        const cmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`;
+        const outputPath = path.join(
+            path.dirname(filePath),
+            "repackaged_" + path.basename(filePath),
+        );
+
+        const ffmpegCmd = `ffmpeg -y -i "${filePath}" -vcodec copy -acodec copy "${outputPath}"`;
+        const ffprobeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${outputPath}`;
 
         try {
-            const { stdout } = await execPromise(cmd);
+            await execPromise(ffmpegCmd);
+
+            const { stdout } = await execPromise(ffprobeCmd);
+
+            fs.unlinkSync(outputPath);
             return parseFloat(stdout.trim());
         } catch (error) {
             console.error("Error getting duration:", error);

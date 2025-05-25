@@ -31,20 +31,9 @@ export class TextToSpeechSpeechController {
     ) {}
 
     @Post("audio")
-    // @UseInterceptors(
-    //     FileInterceptor("file", {
-    //         storage: diskStorage({
-    //             destination: `/home/muhammadxoja/me/echo-note-backend/webm-files`,
-    //             filename: (req, file, cb) => {
-    //                 const uniqueName = `${uuid()}${extname(file.originalname)}`;
-    //                 cb(null, uniqueName);
-    //             },
-    //         }),
-    //     }),
-    // )
-    // @UseInterceptors(FileInterceptor("file"))
+    @UseInterceptors(FileInterceptor("file"))
     async convertAudioToText(
-        // @UploadedFile() file: any,
+        @UploadedFile() file: any,
         @Res() response: Response,
         @Req() request: Request,
     ) {
@@ -52,23 +41,19 @@ export class TextToSpeechSpeechController {
         console.time("justrequest");
         const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
 
-        // const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
+        const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
 
-        // const tempPath = path.join(
-        //     `${process.env.BASE_PATH}/echo-note-backend/webm-files`,
-        //     clientUploadedFileName,
-        // );
+        const tempPath = path.join(
+            `${process.env.BASE_PATH}/echo-note-backend/webm-files`,
+            clientUploadedFileName,
+        );
 
-        // fs.writeFileSync(tempPath, file.buffer);
-
-        // console.log("file", file);
-
-        const inputPath = `${process.env.BASE_PATH}/echo-note-backend/webm-files/1748171631844-output.webm`;
+        fs.writeFileSync(tempPath, file.buffer);
 
         console.time("full request");
         console.log("before request");
 
-        await this.converterAudioToTextUseCase.execute(userId, inputPath);
+        await this.converterAudioToTextUseCase.execute(userId, tempPath);
         console.log("after request");
 
         console.timeEnd("full request");

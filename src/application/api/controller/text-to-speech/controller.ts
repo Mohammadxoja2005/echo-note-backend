@@ -30,19 +30,19 @@ export class TextToSpeechSpeechController {
     ) {}
 
     @Post("audio")
-    @UseInterceptors(
-        FileInterceptor("file", {
-            storage: diskStorage({
-                destination: `/home/muhammadxoja/me/echo-note-backend/webm-files`,
-                filename: (req, file, cb) => {
-                    const uniqueName = `${uuid()}${extname(file.originalname)}`;
-                    cb(null, uniqueName);
-                },
-            }),
-        }),
-    )
+    // @UseInterceptors(
+    //     FileInterceptor("file", {
+    //         storage: diskStorage({
+    //             destination: `/home/muhammadxoja/me/echo-note-backend/webm-files`,
+    //             filename: (req, file, cb) => {
+    //                 const uniqueName = `${uuid()}${extname(file.originalname)}`;
+    //                 cb(null, uniqueName);
+    //             },
+    //         }),
+    //     }),
+    // )
     async convertAudioToText(
-        @UploadedFile() file: any,
+        // @UploadedFile() file: any,
         @Res() response: Response,
         @Req() request: Request,
     ) {
@@ -50,8 +50,8 @@ export class TextToSpeechSpeechController {
         console.time("justrequest");
         const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
 
-        const inputPath = file.path;
-        const outputPath = inputPath.replace(".webm", ".wav");
+        // const inputPath = file.path;
+        // const outputPath = inputPath.replace(".webm", ".wav");
 
         console.time("full request");
         console.log("before request")

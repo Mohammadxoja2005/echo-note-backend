@@ -5,19 +5,24 @@ const tslib_1 = require("tslib");
 const common_1 = require("@nestjs/common");
 const common_2 = require("../../../../common");
 const converter_1 = require("../../../usecases/converter");
+const platform_express_1 = require("@nestjs/platform-express");
 const guard_1 = require("../../guard");
 const jsonwebtoken_1 = require("jsonwebtoken");
+const fs = require("node:fs");
+const path = require("node:path");
 let TextToSpeechSpeechController = class TextToSpeechSpeechController {
     constructor(converterAudioToTextUseCase) {
         this.converterAudioToTextUseCase = converterAudioToTextUseCase;
     }
-    convertAudioToText(response, request) {
+    convertAudioToText(file, response, request) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             console.log("entered request");
             console.time("justrequest");
             const { userId, email, name } = (0, jsonwebtoken_1.decode)(request.header("Token"));
-            // const inputPath = file.path;
-            // const outputPath = inputPath.replace(".webm", ".wav");
+            const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
+            const tempPath = path.join(`/home/muhammadxoja/me/echo-note-backend/webm-files`, clientUploadedFileName);
+            fs.writeFileSync(tempPath, file.buffer);
+            console.log("file", file);
             console.time("full request");
             console.log("before request");
             // await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
@@ -43,10 +48,12 @@ tslib_1.__decorate([
     //     }),
     // )
     ,
-    tslib_1.__param(0, (0, common_1.Res)()),
-    tslib_1.__param(1, (0, common_1.Req)()),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
+    tslib_1.__param(0, (0, common_1.UploadedFile)()),
+    tslib_1.__param(1, (0, common_1.Res)()),
+    tslib_1.__param(2, (0, common_1.Req)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, Object]),
+    tslib_1.__metadata("design:paramtypes", [Object, Object, Object]),
     tslib_1.__metadata("design:returntype", Promise)
 ], TextToSpeechSpeechController.prototype, "convertAudioToText", null);
 exports.TextToSpeechSpeechController = TextToSpeechSpeechController = tslib_1.__decorate([

@@ -20,6 +20,7 @@ import { decode, JwtPayload } from "jsonwebtoken";
 import { UserCheckTrialUseCase } from "app/application/usecases/user/check-trial";
 import { UserUpdateStatusUseCase } from "app/application/usecases/user/update-status/usecase";
 import * as fs from "node:fs";
+import * as path from "node:path";
 
 @UseGuards(AuthGuard)
 @Controller("text-to-speech")
@@ -30,19 +31,20 @@ export class TextToSpeechSpeechController {
     ) {}
 
     @Post("audio")
-    // @UseInterceptors(
-    //     FileInterceptor("file", {
-    //         storage: diskStorage({
-    //             destination: `/home/muhammadxoja/me/echo-note-backend/webm-files`,
-    //             filename: (req, file, cb) => {
-    //                 const uniqueName = `${uuid()}${extname(file.originalname)}`;
-    //                 cb(null, uniqueName);
-    //             },
-    //         }),
-    //     }),
-    // )
+    @UseInterceptors(
+        FileInterceptor("file", {
+            storage: diskStorage({
+                destination: `/webm-files`,
+                filename: (req, file, cb) => {
+                    const uniqueName = `${uuid()}${extname(file.originalname)}`;
+                    cb(null, uniqueName);
+                },
+            }),
+        }),
+    )
+    @UseInterceptors(FileInterceptor("file"))
     async convertAudioToText(
-        // @UploadedFile() file: any,
+        @UploadedFile() file: any,
         @Res() response: Response,
         @Req() request: Request,
     ) {
@@ -50,11 +52,17 @@ export class TextToSpeechSpeechController {
         console.time("justrequest");
         const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
 
-        // const inputPath = file.path;
-        // const outputPath = inputPath.replace(".webm", ".wav");
+        const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
+
+        // const tempPath = path.join(
+        //     `/webm-files`,
+        //     clientUploadedFileName,
+        // );
+
+        // fs.writeFileSync(tempPath, file.buffer);
 
         console.time("full request");
-        console.log("before request")
+        console.log("before request");
 
         // await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
         console.log("after request");

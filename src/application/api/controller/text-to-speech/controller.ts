@@ -46,16 +46,22 @@ export class TextToSpeechSpeechController {
         @Res() response: Response,
         @Req() request: Request,
     ) {
+        console.log("entered request");
+        console.time("justrequest");
         const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
 
         const inputPath = file.path;
         const outputPath = inputPath.replace(".webm", ".wav");
 
         console.time("full request");
+        console.log("before request")
 
         await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+        console.log("after request");
 
         console.timeEnd("full request");
+
+        console.timeEnd("justrequest");
 
         response.json({ status: "progress" });
     }

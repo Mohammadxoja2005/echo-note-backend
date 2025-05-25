@@ -17,12 +17,17 @@ let TextToSpeechSpeechController = class TextToSpeechSpeechController {
     }
     convertAudioToText(file, response, request) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            console.log("entered request");
+            console.time("justrequest");
             const { userId, email, name } = (0, jsonwebtoken_1.decode)(request.header("Token"));
             const inputPath = file.path;
             const outputPath = inputPath.replace(".webm", ".wav");
             console.time("full request");
+            console.log("before request");
             yield this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+            console.log("after request");
             console.timeEnd("full request");
+            console.timeEnd("justrequest");
             response.json({ status: "progress" });
         });
     }

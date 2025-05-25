@@ -11,7 +11,6 @@ let PaymentProcessorLemonSqueezy = class PaymentProcessorLemonSqueezy {
     }
     createCheckoutLink(subscriptionInfo, metadata) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            console.log("subscriptionInfo.customer.name", subscriptionInfo.customer.name);
             const response = yield axios_1.default.post(`${this.baseUrl}/checkouts`, {
                 data: {
                     type: "checkouts",

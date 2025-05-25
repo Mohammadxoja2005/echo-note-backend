@@ -56,7 +56,7 @@ export class TextToSpeechSpeechController {
         console.time("full request");
         console.log("before request")
 
-        await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+        // await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
         console.log("after request");
 
         console.timeEnd("full request");

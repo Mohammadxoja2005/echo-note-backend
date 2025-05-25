@@ -24,7 +24,7 @@ let TextToSpeechSpeechController = class TextToSpeechSpeechController {
             const outputPath = inputPath.replace(".webm", ".wav");
             console.time("full request");
             console.log("before request");
-            yield this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+            // await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
             console.log("after request");
             console.timeEnd("full request");
             console.timeEnd("justrequest");

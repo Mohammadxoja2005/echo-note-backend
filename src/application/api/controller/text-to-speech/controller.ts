@@ -42,9 +42,9 @@ export class TextToSpeechSpeechController {
     //         }),
     //     }),
     // )
-    @UseInterceptors(FileInterceptor("file"))
+    // @UseInterceptors(FileInterceptor("file"))
     async convertAudioToText(
-        @UploadedFile() file: any,
+        // @UploadedFile() file: any,
         @Res() response: Response,
         @Req() request: Request,
     ) {
@@ -52,21 +52,23 @@ export class TextToSpeechSpeechController {
         console.time("justrequest");
         const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
 
-        const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
+        // const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
 
-        const tempPath = path.join(
-            `${process.env.BASE_PATH}/echo-note-backend/webm-files`,
-            clientUploadedFileName,
-        );
+        // const tempPath = path.join(
+        //     `${process.env.BASE_PATH}/echo-note-backend/webm-files`,
+        //     clientUploadedFileName,
+        // );
 
-        fs.writeFileSync(tempPath, file.buffer);
+        // fs.writeFileSync(tempPath, file.buffer);
 
-        console.log("file", file);
+        // console.log("file", file);
+
+        const inputPath = `${process.env.BASE_PATH}/echo-note-backend/webm-files/1748171631844-output.webm`;
 
         console.time("full request");
         console.log("before request");
 
-        // await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+        await this.converterAudioToTextUseCase.execute(userId, inputPath);
         console.log("after request");
 
         console.timeEnd("full request");

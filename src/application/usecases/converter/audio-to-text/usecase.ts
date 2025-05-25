@@ -22,11 +22,7 @@ export class ConverterAudioToTextUseCase {
         private readonly user: UserRepository,
     ) {}
 
-    public async execute(
-        userId: string,
-        webmInputPath: string,
-        wavOutputPath: string,
-    ): Promise<void> {
+    public async execute(userId: string, webmInputPath: string): Promise<void> {
         const user = await this.user.getById(userId);
         const duration = await this.getDuration(webmInputPath);
 
@@ -54,16 +50,16 @@ export class ConverterAudioToTextUseCase {
             status: NoteStatus.progress,
         });
 
-        // this.transcribeChunksAndSave(chunkDir, note.id, userId)
-        //     .then(() => {
-        //         console.log("transcription completed successfully");
-        //         user.remainingSeconds -= duration;
-        //
-        //         this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
-        //     })
-        //     .catch((err) => {
-        //         console.error("Background transcription error:", err);
-        //     });
+        this.transcribeChunksAndSave(chunkDir, note.id, userId)
+            .then(() => {
+                console.log("transcription completed successfully");
+                user.remainingSeconds -= duration;
+
+                this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
+            })
+            .catch((err) => {
+                console.error("Background transcription error:", err);
+            });
     }
 
     private async transcribeChunksAndSave(

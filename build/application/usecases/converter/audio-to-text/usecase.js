@@ -19,7 +19,7 @@ let ConverterAudioToTextUseCase = class ConverterAudioToTextUseCase {
         this.noteRepository = noteRepository;
         this.user = user;
     }
-    execute(userId, webmInputPath, wavOutputPath) {
+    execute(userId, webmInputPath) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const user = yield this.user.getById(userId);
             const duration = yield this.getDuration(webmInputPath);
@@ -38,16 +38,15 @@ let ConverterAudioToTextUseCase = class ConverterAudioToTextUseCase {
                 userId: userId,
                 status: types_1.NoteStatus.progress,
             });
-            // this.transcribeChunksAndSave(chunkDir, note.id, userId)
-            //     .then(() => {
-            //         console.log("transcription completed successfully");
-            //         user.remainingSeconds -= duration;
-            //
-            //         this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
-            //     })
-            //     .catch((err) => {
-            //         console.error("Background transcription error:", err);
-            //     });
+            this.transcribeChunksAndSave(chunkDir, note.id, userId)
+                .then(() => {
+                console.log("transcription completed successfully");
+                user.remainingSeconds -= duration;
+                this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
+            })
+                .catch((err) => {
+                console.error("Background transcription error:", err);
+            });
         });
     }
     transcribeChunksAndSave(chunkDir, noteId, userId) {

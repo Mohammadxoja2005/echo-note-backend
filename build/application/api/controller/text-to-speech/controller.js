@@ -6,10 +6,11 @@ const common_1 = require("@nestjs/common");
 const common_2 = require("../../../../common");
 const converter_1 = require("../../../usecases/converter");
 const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
+const uuid_1 = require("uuid");
 const guard_1 = require("../../guard");
 const jsonwebtoken_1 = require("jsonwebtoken");
-const fs = require("node:fs");
-const path = require("node:path");
 let TextToSpeechSpeechController = class TextToSpeechSpeechController {
     constructor(converterAudioToTextUseCase) {
         this.converterAudioToTextUseCase = converterAudioToTextUseCase;
@@ -20,9 +21,11 @@ let TextToSpeechSpeechController = class TextToSpeechSpeechController {
             console.time("justrequest");
             const { userId, email, name } = (0, jsonwebtoken_1.decode)(request.header("Token"));
             const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
-            const tempPath = path.join(`/home/muhammadxoja/me/echo-note-backend/webm-files`, clientUploadedFileName);
-            fs.writeFileSync(tempPath, file.buffer);
-            console.log("file", file);
+            // const tempPath = path.join(
+            //     `/webm-files`,
+            //     clientUploadedFileName,
+            // );
+            // fs.writeFileSync(tempPath, file.buffer);
             console.time("full request");
             console.log("before request");
             // await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
@@ -35,19 +38,16 @@ let TextToSpeechSpeechController = class TextToSpeechSpeechController {
 };
 exports.TextToSpeechSpeechController = TextToSpeechSpeechController;
 tslib_1.__decorate([
-    (0, common_1.Post)("audio")
-    // @UseInterceptors(
-    //     FileInterceptor("file", {
-    //         storage: diskStorage({
-    //             destination: `/home/muhammadxoja/me/echo-note-backend/webm-files`,
-    //             filename: (req, file, cb) => {
-    //                 const uniqueName = `${uuid()}${extname(file.originalname)}`;
-    //                 cb(null, uniqueName);
-    //             },
-    //         }),
-    //     }),
-    // )
-    ,
+    (0, common_1.Post)("audio"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
+        storage: (0, multer_1.diskStorage)({
+            destination: `/webm-files`,
+            filename: (req, file, cb) => {
+                const uniqueName = `${(0, uuid_1.v4)()}${(0, path_1.extname)(file.originalname)}`;
+                cb(null, uniqueName);
+            },
+        }),
+    })),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
     tslib_1.__param(0, (0, common_1.UploadedFile)()),
     tslib_1.__param(1, (0, common_1.Res)()),

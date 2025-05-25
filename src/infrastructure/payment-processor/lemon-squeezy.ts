@@ -1,5 +1,5 @@
-import {Injectable} from "@nestjs/common";
-import {UserSubscriptionPlan, PaymentProcessor} from "app/domain";
+import { Injectable } from "@nestjs/common";
+import { UserSubscriptionPlan, PaymentProcessor } from "app/domain";
 import axios from "axios";
 import * as process from "node:process";
 
@@ -35,7 +35,6 @@ export class PaymentProcessorLemonSqueezy implements PaymentProcessor {
                         variant_id: subscriptionInfo.product.id,
                         checkout_data: {
                             email: subscriptionInfo.customer.email,
-                            name: subscriptionInfo.customer.name,
                             custom: metadata,
                         },
                     },

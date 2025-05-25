@@ -54,12 +54,12 @@ export class ConverterAudioToTextUseCase {
             status: NoteStatus.progress,
         });
 
-        void this.transcribeChunksAndSave(chunkDir, note.id, userId)
+        this.transcribeChunksAndSave(chunkDir, note.id, userId)
             .then(() => {
                 console.log("transcription completed successfully");
                 user.remainingSeconds -= duration;
 
-                void this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
+                this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
             })
             .catch((err) => {
                 console.error("Background transcription error:", err);

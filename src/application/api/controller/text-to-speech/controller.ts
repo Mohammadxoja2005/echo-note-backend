@@ -51,7 +51,7 @@ export class TextToSpeechSpeechController {
         const inputPath = file.path;
         const outputPath = inputPath.replace(".webm", ".wav");
 
-        await this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
+        this.converterAudioToTextUseCase.execute(userId, inputPath, outputPath);
 
         response.json({ status: "progress" });
     }

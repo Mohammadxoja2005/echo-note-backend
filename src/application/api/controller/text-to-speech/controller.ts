@@ -31,17 +31,17 @@ export class TextToSpeechSpeechController {
     ) {}
 
     @Post("audio")
-    @UseInterceptors(
-        FileInterceptor("file", {
-            storage: diskStorage({
-                destination: `/webm-files`,
-                filename: (req, file, cb) => {
-                    const uniqueName = `${uuid()}${extname(file.originalname)}`;
-                    cb(null, uniqueName);
-                },
-            }),
-        }),
-    )
+    // @UseInterceptors(
+    //     FileInterceptor("file", {
+    //         storage: diskStorage({
+    //             destination: `/home/muhammadxoja/me/echo-note-backend/webm-files`,
+    //             filename: (req, file, cb) => {
+    //                 const uniqueName = `${uuid()}${extname(file.originalname)}`;
+    //                 cb(null, uniqueName);
+    //             },
+    //         }),
+    //     }),
+    // )
     @UseInterceptors(FileInterceptor("file"))
     async convertAudioToText(
         @UploadedFile() file: any,
@@ -54,12 +54,14 @@ export class TextToSpeechSpeechController {
 
         const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
 
-        // const tempPath = path.join(
-        //     `/webm-files`,
-        //     clientUploadedFileName,
-        // );
+        const tempPath = path.join(
+            `${process.env.BASE_PATH}/echo-note-backend/webm-files`,
+            clientUploadedFileName,
+        );
 
-        // fs.writeFileSync(tempPath, file.buffer);
+        fs.writeFileSync(tempPath, file.buffer);
+
+        console.log("file", file);
 
         console.time("full request");
         console.log("before request");

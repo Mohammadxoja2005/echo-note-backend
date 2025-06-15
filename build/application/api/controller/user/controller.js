@@ -41,6 +41,7 @@ let UserController = class UserController {
     authByEmail(request, response) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { email } = request.body;
+            console.log("email", email);
             const user = yield this.userAuthenticateUseCase.execute({
                 name: null,
                 email: email,

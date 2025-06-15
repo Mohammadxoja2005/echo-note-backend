@@ -13,17 +13,23 @@ export class UserRepositoryImpl implements UserRepository {
     ) {}
 
     public async create(user: User): Promise<void> {
-        const isUserExists = await this.model.findOne<UserDocument>({
-            "oauth.google_id": user.oauth.googleId,
-        });
+        console.log("user.oauth.googleId", user.oauth.googleId);
+        // const isUserExists = await this.model.findOne<UserDocument>({
+        //     "oauth.google_id": user.oauth.googleId,
+        // });
 
         const isEmailUserExists = await this.model.findOne<UserDocument>({
             email: user.email,
         });
 
-        if (isUserExists || isEmailUserExists) {
+        console.log("isEmailUserExists", isEmailUserExists);
+
+        if (isEmailUserExists) {
+            console.log("entered condition");
             return;
         }
+
+        console.log("entered user stage");
 
         await this.model.create<UserCreateDocument>({
             name: user.name,

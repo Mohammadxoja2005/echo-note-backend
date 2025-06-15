@@ -12,20 +12,13 @@ let UserRepositoryImpl = class UserRepositoryImpl {
     }
     create(user) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            console.log("user.oauth.googleId", user.oauth.googleId);
-            // const isUserExists = await this.model.findOne<UserDocument>({
-            //     "oauth.google_id": user.oauth.googleId,
-            // });
             const isEmailUserExists = yield this.model.findOne({
                 email: user.email,
             });
-            console.log("isEmailUserExists", isEmailUserExists);
             if (isEmailUserExists) {
-                console.log("entered condition");
-                return;
+                return this.documentToEntity(isEmailUserExists);
             }
-            console.log("entered user stage");
-            yield this.model.create({
+            const document = yield this.model.create({
                 name: user.name,
                 email: user.email,
                 is_active: user.isActive,
@@ -40,6 +33,7 @@ let UserRepositoryImpl = class UserRepositoryImpl {
                     plan: user.subscription.plan,
                 },
             });
+            return this.documentToEntity(document);
         });
     }
     getByGoogleId(id) {

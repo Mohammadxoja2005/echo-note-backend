@@ -17,7 +17,7 @@ export class UserAuthenticateUseCase {
         googleId: string;
     }): Promise<{ user: User; token: string }> {
         try {
-            await this.userRepository.create({
+            const foundUser = await this.userRepository.create({
                 name: user.name,
                 email: user.email,
                 picture: user.picture,
@@ -32,8 +32,6 @@ export class UserAuthenticateUseCase {
                     plan: UserSubscriptionPlan.TRIAL,
                 },
             });
-
-            const foundUser = await this.userRepository.getByGoogleId(user.googleId);
 
             const accessToken: string = sign(
                 { userId: foundUser.id, email: foundUser.email, name: foundUser.name },

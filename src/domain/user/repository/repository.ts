@@ -1,7 +1,7 @@
 import { User, UserSubscriptionPlan } from "app/domain";
 
 export interface UserRepository {
-    create(user: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<void>;
+    create(user: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<User>;
 
     getByGoogleId(id: string): Promise<User>;
 

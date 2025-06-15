@@ -12,26 +12,16 @@ export class UserRepositoryImpl implements UserRepository {
         private readonly model: Model<UserHydratedDocument>,
     ) {}
 
-    public async create(user: User): Promise<void> {
-        console.log("user.oauth.googleId", user.oauth.googleId);
-        // const isUserExists = await this.model.findOne<UserDocument>({
-        //     "oauth.google_id": user.oauth.googleId,
-        // });
-
+    public async create(user: User): Promise<User> {
         const isEmailUserExists = await this.model.findOne<UserDocument>({
             email: user.email,
         });
 
-        console.log("isEmailUserExists", isEmailUserExists);
-
         if (isEmailUserExists) {
-            console.log("entered condition");
-            return;
+            return this.documentToEntity(isEmailUserExists);
         }
 
-        console.log("entered user stage");
-
-        await this.model.create<UserCreateDocument>({
+        const document = await this.model.create<UserCreateDocument>({
             name: user.name,
             email: user.email,
             is_active: user.isActive,
@@ -46,6 +36,8 @@ export class UserRepositoryImpl implements UserRepository {
                 plan: user.subscription.plan,
             },
         });
+
+        return this.documentToEntity(document);
     }
 
     public async getByGoogleId(id: string): Promise<User> {

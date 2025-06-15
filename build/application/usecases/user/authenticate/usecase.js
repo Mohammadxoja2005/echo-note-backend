@@ -13,7 +13,7 @@ let UserAuthenticateUseCase = class UserAuthenticateUseCase {
     execute(user) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                yield this.userRepository.create({
+                const foundUser = yield this.userRepository.create({
                     name: user.name,
                     email: user.email,
                     picture: user.picture,
@@ -28,7 +28,6 @@ let UserAuthenticateUseCase = class UserAuthenticateUseCase {
                         plan: domain_1.UserSubscriptionPlan.TRIAL,
                     },
                 });
-                const foundUser = yield this.userRepository.getByGoogleId(user.googleId);
                 const accessToken = (0, jsonwebtoken_1.sign)({ userId: foundUser.id, email: foundUser.email, name: foundUser.name }, `${process.env.JWT_SECRET_KEY}`);
                 return { user: foundUser, token: accessToken };
             }

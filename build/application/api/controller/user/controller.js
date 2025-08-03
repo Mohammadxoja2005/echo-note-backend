@@ -54,11 +54,14 @@ let UserController = class UserController {
     getProfile(request, response) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { userId, email, name } = (0, jsonwebtoken_1.decode)(request.header("Token"));
+            console.log("User ID:", userId);
             yield this.userUpdateRemainingSecondsUseCase.execute(userId);
             const { isActive, daysLeft } = yield this.userCheckTrialUseCase.execute(userId);
             if (!isActive) {
                 yield this.userUpdateStatusUseCase.execute(userId, { active: false });
-                response.status(common_1.HttpStatus.FORBIDDEN).json({ status: "trial expired" });
+                const user = yield this.userGetProfile.execute(userId);
+                // response.status(HttpStatus.FORBIDDEN).json({ status: "trial expired" });
+                response.status(200).json({ user: user, daysLeft: 7 - daysLeft });
                 return;
             }
             const user = yield this.userGetProfile.execute(userId);

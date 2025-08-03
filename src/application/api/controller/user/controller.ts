@@ -83,7 +83,9 @@ export class UserController {
         if (!isActive) {
             await this.userUpdateStatusUseCase.execute(userId, { active: false });
 
-            response.status(HttpStatus.FORBIDDEN).json({ status: "trial expired" });
+            const user = await this.userGetProfile.execute(userId);
+
+            response.status(200).json({ user: user, daysLeft: 7 - daysLeft });
 
             return;
         }

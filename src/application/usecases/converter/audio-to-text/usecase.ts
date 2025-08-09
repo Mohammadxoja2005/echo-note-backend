@@ -135,19 +135,31 @@ export class ConverterAudioToTextUseCase {
 
         const outputPath = path.join(
             path.dirname(filePath),
-            "repackaged_" + path.basename(filePath),
+            "repackaged_" + path.basename(filePath)
         );
 
-        const ffmpegCmd = `ffmpeg -y -i "${filePath}" -vcodec copy -acodec copy "${outputPath}"`;
-        const ffprobeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${outputPath}`;
-
         try {
+            // Detect audio codec
+            const codecCmd = `ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "${filePath}"`;
+            const { stdout: codecName } = await execPromise(codecCmd);
+
+            let ffmpegCmd;
+            if (codecName.trim() === "aac") {
+                // Safari case → re-encode to opus
+                ffmpegCmd = `ffmpeg -y -i "${filePath}" -c:a libopus "${outputPath}"`;
+            } else {
+                // Chrome/Brave case → just copy
+                ffmpegCmd = `ffmpeg -y -i "${filePath}" -vcodec copy -acodec copy "${outputPath}"`;
+            }
+
             await execPromise(ffmpegCmd);
 
-            const { stdout } = await execPromise(ffprobeCmd);
+            // Now get duration
+            const ffprobeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outputPath}"`;
+            const { stdout: durationStr } = await execPromise(ffprobeCmd);
 
             fs.unlinkSync(outputPath);
-            return parseFloat(stdout.trim());
+            return parseFloat(durationStr.trim());
         } catch (error) {
             console.error("Error getting duration:", error);
             throw new Error("Could not get file duration");

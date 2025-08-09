@@ -135,7 +135,7 @@ export class ConverterAudioToTextUseCase {
 
         const outputPath = path.join(
             path.dirname(filePath),
-            "repackaged_" + path.basename(filePath)
+            "repackaged_" + path.basename(filePath),
         );
 
         try {

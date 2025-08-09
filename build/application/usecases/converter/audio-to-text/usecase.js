@@ -23,6 +23,7 @@ let ConverterAudioToTextUseCase = class ConverterAudioToTextUseCase {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const user = yield this.user.getById(userId);
             const duration = yield this.getDuration(webmInputPath);
+            console.log("duration", duration);
             if (duration > 3600 || user.remainingSeconds < duration) {
                 fs.unlinkSync(webmInputPath);
                 throw new Error("Audio file duration exceeds 1 hour (3600 seconds) or insufficient remaining seconds.");
@@ -69,9 +70,21 @@ let ConverterAudioToTextUseCase = class ConverterAudioToTextUseCase {
     splitAudioToChunks(inputPath, outputDir) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const outputPattern = path.join(outputDir, "chunk_%03d.webm");
+            const execPromise = util.promisify(child_process_1.exec);
+            // Detect audio codec
+            const { stdout: codecName } = yield execPromise(`ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "${inputPath}"`);
+            // Choose command depending on codec
+            let cmd;
+            if (codecName.trim() === "aac") {
+                // Safari → re-encode to opus
+                cmd = `ffmpeg -i "${inputPath}" -f segment -segment_time 60 -c:a libopus "${outputPattern}"`;
+            }
+            else {
+                // Chrome/Brave → just copy
+                cmd = `ffmpeg -i "${inputPath}" -f segment -segment_time 60 -c copy "${outputPattern}"`;
+            }
             return new Promise((resolve, reject) => {
-                const cmd = `ffmpeg -i "${inputPath}" -f segment -segment_time 60 -c copy "${outputPattern}"`;
-                (0, child_process_1.exec)(cmd, (error, stdout, stderr) => {
+                (0, child_process_1.exec)(cmd, (error) => {
                     if (error) {
                         return reject(error);
                     }
@@ -79,7 +92,6 @@ let ConverterAudioToTextUseCase = class ConverterAudioToTextUseCase {
                         .readdirSync(outputDir)
                         .filter((f) => f.endsWith(".webm"))
                         .map((f) => path.join(outputDir, f));
-                    // @ts-ignore
                     resolve(files);
                 });
             });
@@ -89,13 +101,25 @@ let ConverterAudioToTextUseCase = class ConverterAudioToTextUseCase {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const execPromise = util.promisify(child_process_1.exec);
             const outputPath = path.join(path.dirname(filePath), "repackaged_" + path.basename(filePath));
-            const ffmpegCmd = `ffmpeg -y -i "${filePath}" -vcodec copy -acodec copy "${outputPath}"`;
-            const ffprobeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${outputPath}`;
             try {
+                // Detect audio codec
+                const codecCmd = `ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "${filePath}"`;
+                const { stdout: codecName } = yield execPromise(codecCmd);
+                let ffmpegCmd;
+                if (codecName.trim() === "aac") {
+                    // Safari case → re-encode to opus
+                    ffmpegCmd = `ffmpeg -y -i "${filePath}" -c:a libopus "${outputPath}"`;
+                }
+                else {
+                    // Chrome/Brave case → just copy
+                    ffmpegCmd = `ffmpeg -y -i "${filePath}" -vcodec copy -acodec copy "${outputPath}"`;
+                }
                 yield execPromise(ffmpegCmd);
-                const { stdout } = yield execPromise(ffprobeCmd);
+                // Now get duration
+                const ffprobeCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outputPath}"`;
+                const { stdout: durationStr } = yield execPromise(ffprobeCmd);
                 fs.unlinkSync(outputPath);
-                return parseFloat(stdout.trim());
+                return parseFloat(durationStr.trim());
             }
             catch (error) {
                 console.error("Error getting duration:", error);

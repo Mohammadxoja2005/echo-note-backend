@@ -95,13 +95,27 @@ export class ConverterAudioToTextUseCase {
         fs.rmSync(chunkDir, { recursive: true, force: true });
     }
 
-    private async splitAudioToChunks(inputPath: string, outputDir: string): Promise<void> {
+    private async splitAudioToChunks(inputPath: string, outputDir: string): Promise<string[]> {
         const outputPattern = path.join(outputDir, "chunk_%03d.webm");
+        const execPromise = util.promisify(exec);
+
+        // Detect audio codec
+        const { stdout: codecName } = await execPromise(
+            `ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "${inputPath}"`,
+        );
+
+        // Choose command depending on codec
+        let cmd;
+        if (codecName.trim() === "aac") {
+            // Safari → re-encode to opus
+            cmd = `ffmpeg -i "${inputPath}" -f segment -segment_time 60 -c:a libopus "${outputPattern}"`;
+        } else {
+            // Chrome/Brave → just copy
+            cmd = `ffmpeg -i "${inputPath}" -f segment -segment_time 60 -c copy "${outputPattern}"`;
+        }
 
         return new Promise((resolve, reject) => {
-            const cmd = `ffmpeg -i "${inputPath}" -f segment -segment_time 60 -c copy "${outputPattern}"`;
-
-            exec(cmd, (error, stdout, stderr) => {
+            exec(cmd, (error) => {
                 if (error) {
                     return reject(error);
                 }
@@ -111,7 +125,6 @@ export class ConverterAudioToTextUseCase {
                     .filter((f) => f.endsWith(".webm"))
                     .map((f) => path.join(outputDir, f));
 
-                // @ts-ignore
                 resolve(files);
             });
         });

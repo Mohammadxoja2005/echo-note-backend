@@ -18,5 +18,5 @@ export interface UserRepository {
 
     updateStatus(userId: string, status: { active: boolean }): Promise<void>;
 
-    updateRemainingSeconds(userId: string, seconds: number): Promise<void>;
+    updateRemainingSeconds(userId: string, seconds: number, lastVisit?: Date): Promise<void>;
 }

@@ -18,7 +18,7 @@ let UserUpdateRemainingSecondsUseCase = class UserUpdateRemainingSecondsUseCase 
                 const lastVisitStr = user.lastVisit.toISOString().slice(0, 10);
                 if (lastVisitStr !== todayStr &&
                     user.subscription.plan !== domain_1.UserSubscriptionPlan.TRIAL) {
-                    yield this.userRepository.updateRemainingSeconds(userId, 3600);
+                    yield this.userRepository.updateRemainingSeconds(userId, 3600, now);
                 }
             }
             catch (error) {

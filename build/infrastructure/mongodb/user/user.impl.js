@@ -72,11 +72,19 @@ let UserRepositoryImpl = class UserRepositoryImpl {
             });
         });
     }
-    updateRemainingSeconds(userId, seconds) {
+    updateRemainingSeconds(userId, seconds, lastVisit) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield this.model.updateOne({ _id: new mongoose_1.Types.ObjectId(userId) }, {
-                remaining_seconds: seconds,
-            });
+            if (lastVisit) {
+                yield this.model.updateOne({ _id: new mongoose_1.Types.ObjectId(userId) }, {
+                    remaining_seconds: seconds,
+                    last_visit: lastVisit,
+                });
+            }
+            else {
+                yield this.model.updateOne({ _id: new mongoose_1.Types.ObjectId(userId) }, {
+                    remaining_seconds: seconds,
+                });
+            }
         });
     }
     documentToEntity(document) {

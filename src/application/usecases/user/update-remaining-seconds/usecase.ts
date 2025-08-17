@@ -22,7 +22,7 @@ export class UserUpdateRemainingSecondsUseCase {
                 lastVisitStr !== todayStr &&
                 user.subscription.plan !== UserSubscriptionPlan.TRIAL
             ) {
-                await this.userRepository.updateRemainingSeconds(userId, 3600);
+                await this.userRepository.updateRemainingSeconds(userId, 3600, now);
             }
         } catch (error) {
             throw new Error("Error updating remaining seconds", { cause: error });

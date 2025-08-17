@@ -86,13 +86,27 @@ export class UserRepositoryImpl implements UserRepository {
         );
     }
 
-    public async updateRemainingSeconds(userId: string, seconds: number): Promise<void> {
-        await this.model.updateOne(
-            { _id: new Types.ObjectId(userId) },
-            {
-                remaining_seconds: seconds,
-            },
-        );
+    public async updateRemainingSeconds(
+        userId: string,
+        seconds: number,
+        lastVisit?: Date,
+    ): Promise<void> {
+        if (lastVisit) {
+            await this.model.updateOne(
+                { _id: new Types.ObjectId(userId) },
+                {
+                    remaining_seconds: seconds,
+                    last_visit: lastVisit,
+                },
+            );
+        } else {
+            await this.model.updateOne(
+                { _id: new Types.ObjectId(userId) },
+                {
+                    remaining_seconds: seconds,
+                },
+            );
+        }
     }
 
     private documentToEntity(document: UserDocument): User {

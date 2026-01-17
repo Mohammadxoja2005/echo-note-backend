@@ -1,4 +1,4 @@
-name: Build and Deploy (Dist Only)
+name: Build and Deploy
 
 on:
   push:
@@ -50,7 +50,7 @@ jobs:
             # Install only production dependencies on the server
             npm install --omit=dev
             
-            # Restart PM2 pointing to the compiled file inside dist/
-            # Assuming your entry point is dist/index.js
-            pm2 restart echo-note-backend || pm2 start dist/index.js --name echo-note-backend
+            # Restart PM2 pointing to the compiled file inside build/
+            # Assuming your entry point is build/main.js
+            pm2 restart echo-note-backend || pm2 start build/main.js --name echo-note-backend
             pm2 save

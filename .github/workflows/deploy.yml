@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           # We send the compiled code AND the package.json so the server can run it
-          source: "dist/*,package.json,package-lock.json"
+          source: "build/*,package.json,package-lock.json"
           target: "/opt/services/echo-note-backend"
           strip_components: 0 # Keeps the 'dist' folder structure
 

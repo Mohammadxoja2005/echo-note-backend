@@ -1,44 +1,68 @@
-name: Build and Deploy
+name: Build and Deploy Echo Note
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # This adds the "Run workflow" button in GitHub Actions
+  workflow_dispatch: # This creates the "Run workflow" button in GitHub Actions
 
 jobs:
   build:
+    name: Build Application
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js # Change this if you use Python/Go/etc.
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '21.7.3'
+          cache: 'npm'
 
-      - name: Install and Build
-        run: |
-          npm install
-          npm run build
+      - name: Install dependencies
+        run: npm ci
 
-      # If you need to move the built files to the deploy job,
-      # you would use actions/upload-artifact here.
-      # However, for a simple 'git pull' on the server, we just need to ensure the build passes.
+      - name: Build
+        run: npm run build --if-present
 
   deploy:
+    name: Deploy to Server
     runs-on: ubuntu-latest
-    needs: build # This ensures deploy only runs if build succeeds
+    needs: build # Only deploys if the build job passes
     steps:
-      - name: Deploy via SSH
+      - name: Execute Remote SSH Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/services/echo-note-backend
+            # 1. Load NVM into this session (Fixes "npm not found")
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            # 2. Define target directory
+            TARGET_DIR="/opt/services/echo-note-backend"
+
+            # 3. Handle Directory and Git (Fixes "not a git repository")
+            if [ ! -d "$TARGET_DIR" ]; then
+              echo "Directory missing. Creating and cloning..."
+              sudo mkdir -p /opt/services
+              sudo chown -R $USER:$USER /opt/services
+              git clone https://github.com/${{ github.repository }}.git "$TARGET_DIR"
+            fi
+
+            cd "$TARGET_DIR"
+
+            # 4. Pull latest code
             git pull origin main
+
+            # 5. Install & Restart
             npm install --production
-            pm2 restart all # Or your specific restart command
+            
+            # Restart if process exists, otherwise start new
+            pm2 restart echo-note-backend || pm2 start index.js --name echo-note-backend
+            
+            # Save PM2 state for server reboots
+            pm2 save

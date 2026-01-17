@@ -1,14 +1,13 @@
-name: Build and Deploy Echo Note
+name: Build and Deploy (Dist Only)
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # This creates the "Run workflow" button in GitHub Actions
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build Application
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -17,60 +16,41 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '21.7.3'
+          node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install and Build TypeScript
+        run: |
+          npm install
+          npm run build  # This should create your 'dist' folder
 
-      - name: Build
-        run: npm run build --if-present
+      - name: Copy Build to Server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # We send the compiled code AND the package.json so the server can run it
+          source: "dist/*,package.json,package-lock.json"
+          target: "/opt/services/echo-note-backend"
+          strip_components: 0 # Keeps the 'dist' folder structure
 
-  deploy:
-    name: Deploy to Server
-    runs-on: ubuntu-latest
-    needs: build # Only deploys if the build job passes
-    steps:
-      - name: Execute Remote SSH Commands
+      - name: Finalize on Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # 1. Load Environment
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            cd /opt/services/echo-note-backend
             
-            # 2. Setup Directory
-            TARGET_DIR="/opt/services/echo-note-backend"
-            sudo mkdir -p /opt/services
-            sudo chown -R $USER:$USER /opt/services
-            
-            # 3. Handle Cloning (The "Fresh Start" Logic)
-            if [ ! -d "$TARGET_DIR/.git" ]; then
-              echo "Folder empty or not a git repo. Cleaning and cloning fresh..."
-              rm -rf "$TARGET_DIR" # Remove it if it's just an empty folder
-              git clone https://github.com/Mohammadxoja2005/echo-note-backend.git "$TARGET_DIR"
-            fi
-            
-            cd "$TARGET_DIR"
-            
-            # 4. Update Code
-            git fetch --all
-            git reset --hard origin/main # Forces the server to match GitHub exactly
-            
-            # 5. Build and Restart
-            echo "Current files in directory:"
-            ls -la # This helps us debug if files are still missing
-            
+            # Install only production dependencies on the server
             npm install --omit=dev
             
-            # Check if main.js exists before starting
-            if [ -f "main.js" ]; then
-              pm2 restart echo-note-backend --update-env || pm2 start build/main.js --name echo-note-backend
-              pm2 save
-            else
-              echo "ERROR: main.js not found in $(pwd)"
-              exit 1
-            fi
+            # Restart PM2 pointing to the compiled file inside dist/
+            # Assuming your entry point is dist/index.js
+            pm2 restart echo-note-backend || pm2 start dist/index.js --name echo-note-backend
+            pm2 save

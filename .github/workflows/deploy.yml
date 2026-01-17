@@ -66,11 +66,11 @@ jobs:
             
             npm install --omit=dev
             
-            # Check if index.js exists before starting
-            if [ -f "index.js" ]; then
-              pm2 restart echo-note-backend --update-env || pm2 start index.js --name echo-note-backend
+            # Check if main.js exists before starting
+            if [ -f "main.js" ]; then
+              pm2 restart echo-note-backend --update-env || pm2 start build/main.js --name echo-note-backend
               pm2 save
             else
-              echo "ERROR: index.js not found in $(pwd)"
+              echo "ERROR: main.js not found in $(pwd)"
               exit 1
             fi

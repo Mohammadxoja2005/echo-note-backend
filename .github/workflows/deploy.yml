@@ -1,0 +1,44 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # This adds the "Run workflow" button in GitHub Actions
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js # Change this if you use Python/Go/etc.
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+
+      # If you need to move the built files to the deploy job,
+      # you would use actions/upload-artifact here.
+      # However, for a simple 'git pull' on the server, we just need to ensure the build passes.
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build # This ensures deploy only runs if build succeeds
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /path/to/your/project
+            git pull origin main
+            npm install --production
+            pm2 restart all # Or your specific restart command

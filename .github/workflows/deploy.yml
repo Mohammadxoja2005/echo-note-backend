@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js # Change this if you use Python/Go/etc.
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '21.7.3'
 
       - name: Install and Build
         run: |
@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /path/to/your/project
+            cd /opt/services/echo-note-backend
             git pull origin main
             npm install --production
             pm2 restart all # Or your specific restart command

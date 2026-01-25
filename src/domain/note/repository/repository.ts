@@ -12,5 +12,6 @@ export interface NoteRepository {
         userId: string,
         title: string,
         description: string,
+        summarizedText: string,
     ): Promise<void>;
 }

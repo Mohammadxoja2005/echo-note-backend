@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import axios from "axios";
 import * as fs from "node:fs";
+import OpenAI from "openai";
 
 @Injectable()
 export class OpenAIASR {
@@ -50,5 +51,29 @@ export class OpenAIASR {
                 await new Promise((resolve) => setTimeout(resolve, 3000));
             }
         }
+    }
+
+    public summarize(text: string): Promise<string> {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content:
+                        "You are a helpful assistant that summarizes text clearly and concisely.",
+                },
+                {
+                    role: "user",
+                    content: `Summarize the following text:\n\n${text}`,
+                },
+            ],
+            temperature: 0.3,
+        });
+
+        return response.choices[0].message.content ?? "";
     }
 }

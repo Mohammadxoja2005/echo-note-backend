@@ -8,6 +8,7 @@ export const NoteSchema = new Schema<NoteHydratedDocument>(
         description: String,
         user_id: Types.ObjectId,
         status: String,
+        summerized_text: String,
     },
     {
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

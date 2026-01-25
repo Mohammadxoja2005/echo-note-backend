@@ -85,11 +85,14 @@ export class ConverterAudioToTextUseCase {
 
         const fullTranscript = transcriptions.join("\n");
 
+        const summarizedText = await this.openAIASR.summarize(fullTranscript.trim());
+
         await this.noteRepository.updateTitleAndDescription(
             noteId,
             userId,
             format(new Date(), "yyyy-MM-dd"),
             fullTranscript.trim(),
+            summarizedText,
         );
 
         fs.rmSync(chunkDir, { recursive: true, force: true });

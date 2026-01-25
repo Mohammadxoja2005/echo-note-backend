@@ -5,6 +5,7 @@ export type NoteDocument = {
     _id: Types.ObjectId;
     title: string;
     description: string;
+    summerized_text: string;
     user_id: Types.ObjectId;
     status: NoteStatus;
     created_at: Date;

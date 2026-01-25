@@ -1,4 +1,4 @@
-import {Note} from "app/domain";
+import { Note } from "app/domain";
 
 export interface NoteRepository {
     create(note: Omit<Note, "id" | "createdAt" | "updatedAt">): Promise<Note>;
@@ -7,5 +7,10 @@ export interface NoteRepository {
 
     getAll(userId: string, page: number): Promise<{ notes: Note[]; totalPages: number }>;
 
-    updateTitleAndDescription(id: string, userId: string, title: string, description: string): Promise<void>
+    updateTitleAndDescription(
+        id: string,
+        userId: string,
+        title: string,
+        description: string,
+    ): Promise<void>;
 }

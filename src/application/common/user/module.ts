@@ -43,7 +43,7 @@ import { UserUpdateRemainingSecondsUseCase } from "app/application/usecases/user
         UserGetProfile,
         UserAuthenticateUseCase,
         UserLoginWithMailUseCase,
-        UserUpdateRemainingSecondsUseCase
+        UserUpdateRemainingSecondsUseCase,
     ],
     controllers: [UserController],
     exports: [

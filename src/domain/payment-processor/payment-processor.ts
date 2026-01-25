@@ -1,4 +1,4 @@
-import {UserSubscriptionPlan} from "app/domain";
+import { UserSubscriptionPlan } from "app/domain";
 
 export interface PaymentProcessor {
     createCheckoutLink(

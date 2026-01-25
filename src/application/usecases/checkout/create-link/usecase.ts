@@ -1,14 +1,13 @@
-import {Inject, Injectable} from "@nestjs/common";
-import {Infrastructure} from "app/common";
-import {PaymentProcessor, UserSubscriptionPlan} from "app/domain";
+import { Inject, Injectable } from "@nestjs/common";
+import { Infrastructure } from "app/common";
+import { PaymentProcessor, UserSubscriptionPlan } from "app/domain";
 
 @Injectable()
 export class CheckoutCreateLinkUseCase {
     constructor(
         @Inject(Infrastructure.PaymentProcessor.LemonSqueezy)
         private readonly paymentProcessor: PaymentProcessor,
-    ) {
-    }
+    ) {}
 
     public async execute(
         subscriptionInfo: {
@@ -31,7 +30,7 @@ export class CheckoutCreateLinkUseCase {
         try {
             return this.paymentProcessor.createCheckoutLink(subscriptionInfo, metadata);
         } catch (error) {
-            throw new Error("Error creating checkout link", {cause: error});
+            throw new Error("Error creating checkout link", { cause: error });
         }
     }
 }

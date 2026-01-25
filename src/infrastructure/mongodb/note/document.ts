@@ -1,12 +1,12 @@
-import {HydratedDocument, Types} from "mongoose";
-import {NoteStatus} from "app/domain/note/types";
+import { HydratedDocument, Types } from "mongoose";
+import { NoteStatus } from "app/domain/note/types";
 
 export type NoteDocument = {
     _id: Types.ObjectId;
     title: string;
     description: string;
     user_id: Types.ObjectId;
-    status: NoteStatus
+    status: NoteStatus;
     created_at: Date;
     updated_at: Date;
 };

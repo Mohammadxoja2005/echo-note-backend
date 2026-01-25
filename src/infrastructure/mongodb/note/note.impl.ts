@@ -68,6 +68,25 @@ export class NoteRepositoryImpl implements NoteRepository {
         userId: string,
         title: string,
         description: string,
+    ): Promise<void> {
+        await this.model.updateOne(
+            {
+                _id: new Types.ObjectId(id),
+                user_id: new Types.ObjectId(userId),
+            },
+            {
+                title: title,
+                description: description,
+                status: NoteStatus.done,
+            },
+        );
+    }
+
+    public async updateTitleAndSummarizedText(
+        id: string,
+        userId: string,
+        title: string,
+        description: string,
         summarizedText: string,
     ): Promise<void> {
         await this.model.updateOne(

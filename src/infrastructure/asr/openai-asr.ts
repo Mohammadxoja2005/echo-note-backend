@@ -53,7 +53,7 @@ export class OpenAIASR {
         }
     }
 
-    public summarize(text: string): Promise<string> {
+    public async summarize(text: string): Promise<string> {
         const openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
         });

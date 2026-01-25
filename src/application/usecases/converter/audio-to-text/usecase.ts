@@ -87,7 +87,7 @@ export class ConverterAudioToTextUseCase {
 
         const summarizedText = await this.openAIASR.summarize(fullTranscript.trim());
 
-        await this.noteRepository.updateTitleAndDescription(
+        await this.noteRepository.updateTitleAndSummarizedText(
             noteId,
             userId,
             format(new Date(), "yyyy-MM-dd"),

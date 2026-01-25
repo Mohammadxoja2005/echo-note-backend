@@ -2,11 +2,11 @@ import { UserSubscriptionPlan } from "app/domain";
 
 export const PaymentProcessorSubscription = {
     Store: {
-        Id: 158685,
+        Id: 158685, // this is store id which is in settings/stores/
     },
     Product: {
         Id: {
-            Plus: 821412,
+            Plus: 821412, // this is product copy variant id
         },
     },
 };

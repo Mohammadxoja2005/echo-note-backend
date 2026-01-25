@@ -19,11 +19,11 @@ export class ConverterAudioToTextUseCase {
         @Inject(Infrastructure.Repository.Note)
         private readonly noteRepository: NoteRepository,
         @Inject(Infrastructure.Repository.User)
-        private readonly user: UserRepository,
+        private readonly userRepository: UserRepository,
     ) {}
 
     public async execute(userId: string, webmInputPath: string): Promise<void> {
-        const user = await this.user.getById(userId);
+        const user = await this.userRepository.getById(userId);
         const duration = await this.getDuration(webmInputPath);
 
         if (duration > 3600 || user.remainingSeconds < duration) {
@@ -55,7 +55,7 @@ export class ConverterAudioToTextUseCase {
                 console.log("transcription completed successfully");
                 user.remainingSeconds -= duration;
 
-                this.user.updateRemainingSeconds(user.id, user.remainingSeconds);
+                this.userRepository.updateRemainingSeconds(user.id, user.remainingSeconds);
             })
             .catch((err) => {
                 console.error("Background transcription error:", err);

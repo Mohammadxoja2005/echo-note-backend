@@ -4,6 +4,7 @@ export type Note = {
     id: string;
     title: string;
     description: string;
+    summerizedText: string;
     userId: string;
     status: NoteStatus;
     createdAt: Date;

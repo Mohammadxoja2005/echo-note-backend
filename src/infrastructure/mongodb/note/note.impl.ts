@@ -17,6 +17,7 @@ export class NoteRepositoryImpl implements NoteRepository {
         const document = await this.model.create({
             title: note.title,
             description: note.description,
+            summerized_text: note.summerizedText,
             user_id: new Types.ObjectId(note.userId),
             status: note.status,
         });
@@ -108,6 +109,7 @@ export class NoteRepositoryImpl implements NoteRepository {
             id: document._id.toString(),
             title: document.title,
             description: document.description,
+            summerizedText: document.summerized_text,
             userId: document.user_id.toString(),
             status: document.status,
             createdAt: document.created_at,

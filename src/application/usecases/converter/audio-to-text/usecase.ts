@@ -46,6 +46,7 @@ export class ConverterAudioToTextUseCase {
         const note = await this.noteRepository.create({
             title: "",
             description: "",
+            summerizedText: "",
             userId: userId,
             status: NoteStatus.progress,
         });

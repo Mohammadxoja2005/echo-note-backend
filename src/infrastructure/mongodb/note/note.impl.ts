@@ -104,6 +104,13 @@ export class NoteRepositoryImpl implements NoteRepository {
         );
     }
 
+    public async delete(id: string, userId: string): Promise<void> {
+        await this.model.deleteOne({
+            _id: new Types.ObjectId(id),
+            user_id: new Types.ObjectId(userId),
+        });
+    }
+
     private documentToEntity(document: NoteDocument): Note {
         return {
             id: document._id.toString(),

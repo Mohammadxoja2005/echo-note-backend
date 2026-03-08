@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "app/application/api/guard";
 import { NoteGetAllUseCase } from "app/application/usecases/note/get-all";
 import { NoteGetUseCase } from "app/application/usecases/note/get";
 import { NoteUpdateTitleAndDescription } from "app/application/usecases/note/update-title-and-description";
+import { NoteDeleteUseCase } from "app/application/usecases/note/delete";
 import { Request, Response } from "express";
 import { decode, JwtPayload } from "jsonwebtoken";
 
@@ -13,6 +14,7 @@ export class NoteController {
         private readonly noteGetAllUseCase: NoteGetAllUseCase,
         private readonly noteGetUseCase: NoteGetUseCase,
         private readonly noteUpdateTitleAndDescription: NoteUpdateTitleAndDescription,
+        private readonly noteDeleteUseCase: NoteDeleteUseCase,
     ) {}
 
     @Get("get-all/:pageNumber")
@@ -49,6 +51,17 @@ export class NoteController {
         const { title, description } = request.body;
 
         await this.noteUpdateTitleAndDescription.execute(noteId, userId, title, description);
+
+        response.status(200).json({ status: "success" });
+    }
+
+    @Delete("delete/:noteId")
+    async delete(@Req() request: Request, @Res() response: Response) {
+        const { userId } = decode(request.header("Token") as string) as JwtPayload;
+
+        const { noteId } = request.params;
+
+        await this.noteDeleteUseCase.execute(noteId, userId);
 
         response.status(200).json({ status: "success" });
     }

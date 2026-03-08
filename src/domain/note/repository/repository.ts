@@ -21,4 +21,6 @@ export interface NoteRepository {
         description: string,
         summarizedText: string,
     ): Promise<void>;
+
+    delete(id: string, userId: string): Promise<void>;
 }

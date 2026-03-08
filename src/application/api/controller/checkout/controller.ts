@@ -23,7 +23,7 @@ export class CheckoutController {
                     id: PaymentProcessorSubscription.Store.Id,
                 },
                 product: {
-                    id: PaymentProcessorSubscription.Product.Id.Plus,
+                    id: parseInt(process.env.COPY_VARIANT_ID || "1"),
                 },
                 customer: {
                     email: email,

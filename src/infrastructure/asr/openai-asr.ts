@@ -64,11 +64,11 @@ export class OpenAIASR {
                 {
                     role: "system",
                     content:
-                        "You are a helpful assistant that summarizes text clearly and concisely.",
+                        "You are a helpful assistant that analyzes text and extracts structured insights.",
                 },
                 {
                     role: "user",
-                    content: `Summarize the following text:\n\n${text}`,
+                    content: `Analyze the following text and respond with exactly two sections:\n\n## Summary\nA concise overview in 2-3 sentences.\n\n## Key Points\nA bullet list of the most important points.\n\nText:\n${text}`,
                 },
             ],
             temperature: 0.3,

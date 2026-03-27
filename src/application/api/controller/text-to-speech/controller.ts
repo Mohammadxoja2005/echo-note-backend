@@ -1,28 +1,23 @@
 import {
+    Body,
     Controller,
     Inject,
     Post,
     Req,
     Res,
-    UploadedFile,
     UseGuards,
-    UseInterceptors,
 } from "@nestjs/common";
 import { Application } from "app/common";
 import { ConverterAudioToTextUseCase } from "app/application/usecases/converter";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { extname } from "path";
 import { v4 as uuid } from "uuid";
 import { Response, Request } from "express";
 import { AuthGuard } from "app/application/api/guard";
 import { decode, JwtPayload } from "jsonwebtoken";
-import { UserCheckTrialUseCase } from "app/application/usecases/user/check-trial";
-import { UserUpdateStatusUseCase } from "app/application/usecases/user/update-status/usecase";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Readable } from "node:stream";
 
 @UseGuards(AuthGuard)
 @Controller("text-to-speech")
@@ -33,34 +28,44 @@ export class TextToSpeechSpeechController {
     ) {}
 
     @Post("audio")
-    @UseInterceptors(FileInterceptor("file"))
     async convertAudioToText(
-        @UploadedFile() file: any,
+        @Body() body: { key: string },
         @Res() response: Response,
         @Req() request: Request,
     ) {
-        console.log("entered request");
-        console.time("justrequest");
-        const { userId, email, name } = decode(request.header("Token") as string) as JwtPayload;
+        const { userId } = decode(request.header("Token") as string) as JwtPayload;
 
-        const clientUploadedFileName = `${Date.now()}-${file.originalname}`;
+        const client = new S3Client({
+            endpoint: process.env.CONTABO_S3_ENDPOINT,
+            region: process.env.CONTABO_S3_REGION ?? "default",
+            credentials: {
+                accessKeyId: process.env.CONTABO_S3_ACCESS_KEY as string,
+                secretAccessKey: process.env.CONTABO_S3_SECRET_KEY as string,
+            },
+            forcePathStyle: true,
+        });
 
-        const tempPath = path.join(
-            `${process.env.BASE_PATH}/echo-note-backend/webm-files`,
-            clientUploadedFileName,
+        const s3Object = await client.send(
+            new GetObjectCommand({
+                Bucket: process.env.CONTABO_S3_BUCKET as string,
+                Key: body.key,
+            }),
         );
 
-        fs.writeFileSync(tempPath, file.buffer);
+        const fileName = `${Date.now()}-${path.basename(body.key)}`;
+        const tempPath = path.join(
+            `${process.env.BASE_PATH}/echo-note-backend/webm-files`,
+            fileName,
+        );
 
-        console.time("full request");
-        console.log("before request");
+        const fileStream = fs.createWriteStream(tempPath);
+        await new Promise<void>((resolve, reject) => {
+            (s3Object.Body as Readable).pipe(fileStream).on("finish", resolve).on("error", reject);
+        });
 
-        await this.converterAudioToTextUseCase.execute(userId, tempPath);
-        console.log("after request");
-
-        console.timeEnd("full request");
-
-        console.timeEnd("justrequest");
+        this.converterAudioToTextUseCase.execute(userId, tempPath).catch((err) => {
+            console.error("Background transcription error:", err);
+        });
 
         response.json({ status: "progress" });
     }

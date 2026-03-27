@@ -51,7 +51,7 @@ export class ConverterAudioToTextUseCase {
             status: NoteStatus.progress,
         });
 
-        this.transcribeChunksAndSave(chunkDir, note.id, userId)
+        await this.transcribeChunksAndSave(chunkDir, note.id, userId)
             .then(() => {
                 console.log("transcription completed successfully");
                 user.remainingSeconds -= duration;

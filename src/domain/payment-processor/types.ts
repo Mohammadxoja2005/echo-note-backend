@@ -23,6 +23,7 @@ export type PaymentProcessorTransaction = {
         id: string;
         attributes: {
             store_id: number;
+            subscription_id: string;
             customer_id: number;
             order_id: number;
             order_item_id: number;

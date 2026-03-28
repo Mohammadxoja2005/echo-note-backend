@@ -35,21 +35,10 @@ export class WebhookSubscriptionController {
             throw new Error("Invalid signature.");
         }
 
-        if (
-            [
-                PaymentProcesserEvent.SUBSCRIPTION_PAYMENT_SUCCESS,
-                PaymentProcesserEvent.SUBSCRIPTION_PLAN_CHANGED,
-                PaymentProcesserEvent.SUBSCRIPTION_CREATED,
-                PaymentProcesserEvent.SUBSCRIPTION_RESUMED,
-            ].includes(transaction.meta.event_name) ||
-            [
-                PaymentProcessorTransactionStatus.ACTIVE,
-                PaymentProcessorTransactionStatus.PAID,
-            ].includes(transaction.data.attributes.status)
-        ) {
+        if (PaymentProcesserEvent.SUBSCRIPTION_PAYMENT_SUCCESS === transaction.meta.event_name) {
             const userId = transaction.meta.custom_data.userId;
             const plan = transaction.meta.custom_data.plan;
-            const subscriptionId = transaction.data.id;
+            const subscriptionId = transaction.data.attributes.subscription_id;
 
             await this.subscriptionActivateUseCase.execute({
                 id: userId,

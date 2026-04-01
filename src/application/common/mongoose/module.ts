@@ -4,7 +4,7 @@ import { MongooseModule as Mongoose } from "@nestjs/mongoose";
 @Module({
     imports: [
         Mongoose.forRoot(
-            "mongodb+srv://echonote:Muha2005@cluster0.rmixi.mongodb.net/echo_note?retryWrites=true&w=majority&appName=Cluster0",
+            "mongodb+srv://echonote:Muha2005@cluster0.tdrte49.mongodb.net/?appName=Cluster0",
         ),
     ],
 })
